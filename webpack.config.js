@@ -16,10 +16,14 @@ module.exports = {
     // apply loaders to files that meet given conditions
     loaders: [{
       test: /\.jsx?$/,
-      include: path.join(__dirname, '/client/src'),
-      loader: 'babel',
+      // exclude: /node_modules/,
+      include: [
+        path.join(__dirname, '/client/src'),
+        path.join(__dirname, '/node_modules/react-dates')
+      ],
+      loader: 'babel-loader',
       query: {
-        presets: ["react", "es2015"]
+        presets: ["react", "es2015","stage-2"]
       }
     },
     {
@@ -28,7 +32,11 @@ module.exports = {
       options: {
         limit: 8192
       }
-    }
+    },
+    {
+      test: /\.css$/,
+      use: [ 'style-loader','css-loader' ]
+    },
   ]
   },
 

@@ -1,6 +1,8 @@
 import React from 'react';
 import { Card, CardTitle } from 'material-ui/Card';
 import PlacesSearchBox from './PlacesSearchBox';
+import DateRangePickerWrapper from './DateRangePickerWrapper';
+
 
 // FourSquare API
 // CLIENT_ID:
@@ -12,8 +14,9 @@ import PlacesSearchBox from './PlacesSearchBox';
 
 const HomePage = () => (
   <Card className="container">
-    <CardTitle title="React Application" subtitle="This is the home page." />
+    <CardTitle title="Instant Trip" subtitle="This is the home page." />
     <PlacesSearchBox />
+    <DateRangePickerWrapper />
   </Card>
 );
 
