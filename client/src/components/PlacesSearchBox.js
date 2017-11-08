@@ -1,21 +1,27 @@
 import React from 'react'
-import PlacesAutocomplete, { geocodeByAddress, getLatLng } from 'react-places-autocomplete'
+import PlacesAutocomplete from 'react-places-autocomplete'
 
 class PlacesSearchBox extends React.Component {
   constructor(props) {
     super(props)
     this.state = { address: '' }
-    this.onChange = (address) => this.setState({ address })
-    this.handleFormSubmit = this.handleFormSubmit.bind(this);
+    this.onChange = this.onChange.bind(this)
+    // this.onChange = (address) => this.setState({ address })
+    // this.handleFormSubmit = this.handleFormSubmit.bind(this);
   }
 
-  handleFormSubmit(event) {
-    event.preventDefault()
+  // handleFormSubmit(event) {
+  //   event.preventDefault()
 
-    geocodeByAddress(this.state.address)
-      .then(results => getLatLng(results[0]))
-      .then(latLng => console.log('Success', latLng))
-      .catch(error => console.error('Error', error))
+  //   geocodeByAddress(this.state.address)
+  //     .then(results => getLatLng(results[0]))
+  //     .then(latLng => console.log('Success', latLng))  //call callback with latLng
+  //     .catch(error => console.error('Error', error))
+  // }
+
+  onChange(address) {
+    this.setState({address});
+    this.props.setParentPlacesState(address);
   }
 
   render() {
@@ -26,10 +32,10 @@ class PlacesSearchBox extends React.Component {
     }
 
     return (
-      <form onSubmit={this.handleFormSubmit}>
+      // <form onSubmit={this.handleFormSubmit}>
         <PlacesAutocomplete inputProps={inputProps} />
-        <button type="submit">Submit</button>
-      </form>
+        // <button type="submit">Submit</button>
+      // </form>
     )
   }
 }
