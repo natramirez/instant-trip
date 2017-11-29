@@ -28,7 +28,8 @@ class PlacesSearchBox extends React.Component {
     const inputProps = {
       value: this.state.address,
       onChange: this.onChange,
-      placeholder: 'e.g. San Francisco, CA'
+      placeholder: 'e.g. San Francisco, CA',
+      types: 'cities'
     }
 
     return (

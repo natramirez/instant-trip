@@ -1,47 +1,44 @@
 import React, { Component} from 'react';
 import { PropTypes } from 'prop-types';
+import MatUiCheckbox from 'material-ui/Checkbox'
+
+const styles = {
+  checkbox: {
+    marginBottom: 10,
+    textAlign: 'start',
+    maxWidth: 150,
+    margin: 'auto'
+  }
+};
 
 class Checkbox extends Component {
   state = {
-    isChecked: false,
+    checked: false,
   }
 
-  toggleCheckboxChange = () => {
-    const { handleCheckboxChange, label } = this.props;
 
-    this.setState(({ isChecked }) => (
-      {
-        isChecked: !isChecked,
-      }
-    ));
-
+  updateCheck() {
+    const { handleCheckboxChange, label } = this.props;    
+    this.setState((oldState) => {
+      return {
+        checked: !oldState.checked,
+      };
+    });
     handleCheckboxChange(label);
   }
 
   render() {
     const { label } = this.props;
-    const { isChecked } = this.state;
 
     return (
-      <div className="checkbox">
-        <label>
-          <input
-            type="checkbox"
-            value={label}
-            checked={isChecked}
-            onChange={this.toggleCheckboxChange}
-          />
-
-          {label}
-        </label>
-      </div>
+      <MatUiCheckbox
+      label={label}
+      checked={this.state.checked}
+      onCheck={this.updateCheck.bind(this)}
+      style={styles.checkbox}
+    />
     );
   }
 }
-
-Checkbox.propTypes = {
-  label: PropTypes.string.isRequired,
-  handleCheckboxChange: PropTypes.func.isRequired,
-};
 
 export default Checkbox;

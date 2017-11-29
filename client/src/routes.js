@@ -1,16 +1,18 @@
 import Base from './components/Base.jsx';
 import HomePage from './components/HomePage.jsx';
 import DashboardPage from './containers/DashboardPage.jsx';
+import SuggestionsPage from './containers/SuggestionsPage.jsx';
 import LoginPage from './containers/LoginPage.jsx';
 import SignUpPage from './containers/SignUpPage.jsx';
 import Auth from './modules/Auth';
+
+// import module for trip plan in progress
 
 
 const routes = {
   // base component (wrapper for the whole application).
   component: Base,
   childRoutes: [
-
     {
       path: '/',
       getComponent: (location, callback) => {
@@ -20,6 +22,17 @@ const routes = {
           callback(null, HomePage);
         }
       }
+    },
+    {
+      path: '/suggestions',
+      component: SuggestionsPage
+      // getComponent: (location, callback) => {
+        // if (Auth.isUserAuthenticated()) { //if plan in progress
+        //   callback(null, DashboardPage); //SuggestionsPage
+        // } else {
+          // callback(null, DashboardPage);
+        // }
+      // }
     },
 
     {

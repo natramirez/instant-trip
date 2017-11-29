@@ -47,6 +47,17 @@ a:hover {
   text-align: center;
   width: 700px;
 }
+.suggestions-container {
+  margin: 0 auto;
+  text-align: center;
+  width: 700px;
+}
+
+.suggestion-box {
+  margin: 0 auto;
+  width: 300px;
+  text-align: left;
+}
 
 .card-heading {
   padding: 16px;
