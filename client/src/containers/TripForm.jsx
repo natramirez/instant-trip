@@ -116,7 +116,12 @@ class TripForm extends React.Component {
             // change the current URL to /
             that.context.router.push({ //browserHistory.push should also work here
               pathname: '/suggestions',
-              state: {data: xhr.response.response.response}
+              state: {
+                place: that.state.address,
+                lat: coordinates.lat,
+                lng: coordinates.lng,
+                data: xhr.response.response.response
+              }
             });
           } else {
             // failure

@@ -14,7 +14,10 @@ class SuggestionsPage extends React.Component {
     super(props);
     
     if (this.props.location.state.data) {
-      this.data = this.props.location.state.data
+      this.place = this.props.location.state.place;
+      this.lattitude = this.props.location.state.lat;
+      this.longitude = this.props.location.state.lng;
+      this.data = this.props.location.state.data;
     }
 
     // this.createSuggestionBoxes = this.createSuggestionBoxes.bind(this);
