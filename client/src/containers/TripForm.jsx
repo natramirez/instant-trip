@@ -9,20 +9,36 @@ import Checkbox from '../components/Checkbox.jsx';
 // const config = require('../../../config');
 import request from 'request';
 
+// const items = [
+//   'Landmarks',
+//   'Museums',
+//   'Parks',
+//   'Shopping',
+//   'Outdoors'
+// ];
+// const categories = {
+//   'Landmarks':['4bf58dd8d48988d12d941735'], //monument/landmark
+//   'Museums':['4bf58dd8d48988d181941735'], //museums
+//   'Parks':['52e81612bcbc57f1066b7a21','4bf58dd8d48988d163941735'], //natl park, park
+//   'Shopping':['4bf58dd8d48988d1fd941735','5744ccdfe4b0c0459246b4dc', '4bf58dd8d48988d103951735'],
+//   'Outdoors':['56aa371be4b08b9a8d573544','4bf58dd8d48988d1e2941735','56aa371be4b08b9a8d57355e','52e81612bcbc57f1066b7a22','4bf58dd8d48988d1e4941735','56aa371be4b08b9a8d573511','52e81612bcbc57f1066b7a12','4bf58dd8d48988d159941735','5032848691d4c4b30a586d61','56aa371be4b08b9a8d573560','4bf58dd8d48988d1e9941735','50328a4b91d4c4b30a586d6b','52e81612bcbc57f1066b7a29','4bf58dd8d48988d162941735','4bf58dd8d48988d161941735','4bf58dd8d48988d160941735'] //bay, beach, bike trail, botanical garden, campground, cave, dive spot,trail, volcano, waterfall, ski area, rock climbing spot, rafting, other great outdoors,lake, hot spring
+// }
 const items = [
-  'Landmarks',
-  'Museums',
-  'Parks',
+  'Sightseeing',
+  'Discovering',
+  'Eating',
+  'Nightlife',
   'Shopping',
   'Outdoors'
 ];
-
 const categories = {
-  'Landmarks':['4bf58dd8d48988d12d941735'], //monument/landmark
-  'Museums':['4bf58dd8d48988d181941735'], //museums
-  'Parks':['52e81612bcbc57f1066b7a21','4bf58dd8d48988d163941735'], //natl park, park
-  'Shopping':['4bf58dd8d48988d1fd941735','5744ccdfe4b0c0459246b4dc', '4bf58dd8d48988d103951735'],
-  'Outdoors':['56aa371be4b08b9a8d573544','4bf58dd8d48988d1e2941735','56aa371be4b08b9a8d57355e','52e81612bcbc57f1066b7a22','4bf58dd8d48988d1e4941735','56aa371be4b08b9a8d573511','52e81612bcbc57f1066b7a12','4bf58dd8d48988d159941735','5032848691d4c4b30a586d61','56aa371be4b08b9a8d573560','4bf58dd8d48988d1e9941735','50328a4b91d4c4b30a586d6b','52e81612bcbc57f1066b7a29','4bf58dd8d48988d162941735','4bf58dd8d48988d161941735','4bf58dd8d48988d160941735'] //bay, beach, bike trail, botanical garden, campground, cave, dive spot,trail, volcano, waterfall, ski area, rock climbing spot, rafting, other great outdoors,lake, hot spring
+  'Sightseeing':['sightseeing'], //monument/landmark
+  'Discovering':['discovering'], //museums
+  'Eating':['eating'], //natl park, park
+  'Nightlife':['going_out'],
+  'Shopping':['shopping'],
+  'Outdoors':['hiking','doing_sports']
+  
 }
 
 class TripForm extends React.Component {
@@ -82,7 +98,7 @@ class TripForm extends React.Component {
           console.log(checkbox, 'is selected.');
           categoryIds = categoryIds.concat(categories[checkbox]);
         }
-        categoryIds = encodeURIComponent(categoryIds.join(','));
+        categoryIds = encodeURIComponent(categoryIds.join('|'));
         
         console.log('Success', coordinates);
         var ll = JSON.stringify(coordinates.lat)+','+JSON.stringify(coordinates.lng);
@@ -120,7 +136,7 @@ class TripForm extends React.Component {
                 place: that.state.address,
                 lat: coordinates.lat,
                 lng: coordinates.lng,
-                data: xhr.response.response.response
+                data: xhr.response.response.data
               }
             });
           } else {

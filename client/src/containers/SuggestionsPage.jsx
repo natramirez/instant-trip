@@ -30,26 +30,28 @@ class SuggestionsPage extends React.Component {
     return (icon.prefix + 'bg_'+'44' + icon.suffix);
   }
 
-  getPrimaryCategory(categories) {
-    for (const cat of categories) {
-      console.log('category: ',cat.shortName);
-      if (cat.primary) {return cat.shortName}
-    }
-  }
+  // getPrimaryCategory(categories) {
+  //   for (const cat of categories) {
+  //     console.log('category: ',cat.shortName);
+  //     if (cat.primary) {return cat.shortName}
+  //   }
+  // }
+  
 
-  createSuggestion = (venue,index) => {
-    console.log(venue.name)
-    console.log(venue.url)
+  createSuggestion = (place,index) => {
+    console.log(place.name)
+    console.log(place.url)
 
-    var urlBtn = venue.url ? <CardActions><FlatButton label="Website" href={venue.url}/></CardActions> : "";
+    var urlBtn = place.url ? <CardActions><FlatButton label="Website" href={place.url}/></CardActions> : "";
 
-    var iconUrl = this.getIconUrl(venue.categories[0].icon);
-    console.log(iconUrl);
-    var avatar = iconUrl ? <CardHeader
-        title={venue.name}
-        subtitle={this.getPrimaryCategory(venue.categories)}
-        avatar={iconUrl}
-      /> : <CardHeader title={venue.name} subtitle={this.getPrimaryCategory(venue.categories)}/>;
+    // var iconUrl = this.getIconUrl(place.categories[0].icon);
+    // console.log(iconUrl);
+    var thumbnailUrl = place.thumbnail_url;
+    var avatar = thumbnailUrl ? <CardHeader
+        title={place.name}
+        subtitle={place.categories[0]}
+        avatar={thumbnailUrl}
+      /> : <CardHeader title={place.name} subtitle={place.categories[0]}/>;
 
     return (
     <Card className="suggestion-box" key={index}>
@@ -59,7 +61,7 @@ class SuggestionsPage extends React.Component {
   )};
 
   createSuggestionBoxes = () => (
-    this.data.venues.map(this.createSuggestion)
+    this.data.places.map(this.createSuggestion)
   )
 
   // createSuggestionBoxes() {
