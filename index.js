@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const passport = require('passport');
+const path = require('path');
 // const config = require('./config');
 
 var dbUri = 'mongodb://react-auth:react123@ds135522.mlab.com:35522/react-auth-example';
@@ -35,6 +36,9 @@ const planRoutes = require('./server/routes/plan');
 app.use('/auth', authRoutes);
 app.use('/api', apiRoutes);
 app.use('/plan', planRoutes);
+app.get('*', function (request, response){
+  response.sendFile(path.join(__dirname, '/server','/static', 'index.html'));
+})
 
 
 
