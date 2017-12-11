@@ -20,7 +20,7 @@ a:hover {
 
 .top-bar {
   padding: 10px 15px;
-  margin-bottom: 50px;
+  /* margin-bottom: 50px; */
 }
 .top-bar::after {
   content: '';
@@ -50,13 +50,42 @@ a:hover {
 .suggestions-container {
   margin: 0 auto;
   text-align: center;
-  width: 700px;
+  /* width: 700px; */
+}
+
+.suggestions-subcontainer {
+  display: flex;
+  height: 700px;
+}
+.suggestions-panel {
+  overflow-y: scroll;
+  overflow-x: visible;
+  width: 300px;
 }
 
 .suggestion-box {
   margin: 0 auto;
-  width: 300px;
+  /* width: 250px; */
   text-align: left;
+}
+
+div.suggestion-box:hover {
+  background-color: red !important;
+}
+
+div.suggestion-box.active {
+  background-color: red !important;
+}
+
+div.suggestion-box img.suggestions-img {
+  /* width: 250px !important; */
+  min-width: 200px !important;
+  max-width: 250px !important;
+}
+
+.suggestions-map {
+  width: 100%;
+  height: 500px;
 }
 
 .card-heading {

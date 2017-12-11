@@ -107,7 +107,7 @@ class TripForm extends React.Component {
 
         // console.log('requrl: '+ reqUrl);
 
-        const formData = `ll=${ll}&categoryIds=${categoryIds}`;
+        const formData = `place=${this.state.address}&categoryIds=${categoryIds}`;
         console.log('categoryIds: ' + categoryIds);
 
         // create an AJAX request

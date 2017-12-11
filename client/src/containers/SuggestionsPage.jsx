@@ -1,7 +1,9 @@
 import React from 'react';
 // import Auth from '../modules/Auth';
-import { Card, CardTitle, CardHeader, CardText, CardActions } from 'material-ui/Card';
+import { Card, CardTitle, CardHeader, CardText, CardActions, CardMedia } from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
+import SuggestionsMap from '../components/SuggestionsMap.jsx';
+
 // import Suggestions from '../components/Suggestions.jsx';
 
 
@@ -19,6 +21,9 @@ class SuggestionsPage extends React.Component {
       this.longitude = this.props.location.state.lng;
       this.data = this.props.location.state.data;
     }
+    this.state = {
+      selected: {lat:this.lattitude, lng: this.longitude}
+    }
 
     // this.createSuggestionBoxes = this.createSuggestionBoxes.bind(this);
     
@@ -30,6 +35,15 @@ class SuggestionsPage extends React.Component {
     return (icon.prefix + 'bg_'+'44' + icon.suffix);
   }
 
+  onClick(location) {
+    console.log("changing selected to : "+ JSON.stringify(location));
+    if(this.state.selected == location) {
+      this.setState({selected:{}});
+    } else {
+      this.setState({selected:location});      
+    }
+  }
+
   // getPrimaryCategory(categories) {
   //   for (const cat of categories) {
   //     console.log('category: ',cat.shortName);
@@ -39,23 +53,34 @@ class SuggestionsPage extends React.Component {
   
 
   createSuggestion = (place,index) => {
-    console.log(place.name)
-    console.log(place.url)
+    // console.log(place.name)
+    // console.log(place.url)
 
     var urlBtn = place.url ? <CardActions><FlatButton label="Website" href={place.url}/></CardActions> : "";
 
     // var iconUrl = this.getIconUrl(place.categories[0].icon);
     // console.log(iconUrl);
-    var thumbnailUrl = place.thumbnail_url;
-    var avatar = thumbnailUrl ? <CardHeader
+    // var thumbnailUrl = place.thumbnail_url;
+    var header = place.thumbnail_url ? <CardHeader
         title={place.name}
         subtitle={place.categories[0]}
-        avatar={thumbnailUrl}
+        avatar={place.thumbnail_url}
       /> : <CardHeader title={place.name} subtitle={place.categories[0]}/>;
+    var media = place.thumbnail_url ? (
+      <CardMedia overlay={
+        <CardTitle 
+        title={place.name}
+        subtitle={place.categories}
+        />}>
+        <img className="suggestions-img" src={place.thumbnail_url} alt="" />
+      </CardMedia>) : "";
+    // console.log("location: "+JSON.stringify(place.location));
+    var classes = "suggestion-box" + ((this.state.selected == place.location) ? " active" : "");
 
     return (
-    <Card className="suggestion-box" key={index}>
-      {avatar}
+    <Card className={classes} key={index} onClick={this.onClick.bind(this, place.location)}>
+      {/* {header} */}
+      {media}
       {urlBtn}
     </Card>
   )};
@@ -106,21 +131,24 @@ class SuggestionsPage extends React.Component {
    * Render the component.
    */
   render() {
-    // return (<Suggestions data={this.props.location.state.data} />);
-
     return (
     <Card className="suggestions-container">
       <CardTitle
         title="Sightseeing Suggestions"
         subtitle="Select from the following suggestions:"
       />
-      
-      {this.createSuggestionBoxes()}
-      
-  </Card>
-  );
+      <div className="suggestions-subcontainer">
+        <div className="suggestions-panel">
+        {this.createSuggestionBoxes()}
+        </div>
+        <SuggestionsMap coordinates={this.state.selected}/>
+        <div className="suggestions-panel">
+        {this.createSuggestionBoxes()}
+        </div>
+      </div>
+    </Card>
+    );
   }
-
 }
 
 export default SuggestionsPage;

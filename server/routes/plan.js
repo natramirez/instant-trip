@@ -17,11 +17,11 @@ function validateTripForm(payload) {
   let isFormValid = true;
   let message = '';
 
-  if (!payload || !payload.ll) {
+  if (!payload || !payload.place) {
     isFormValid = false;
     errors.city = 'Please provide a travel destination.';
   }
-  if (!payload || !payload.categoryIds) {
+  if (!payload.categoryIds) {
     isFormValid = false;
     errors.categoryIds = 'Please select at least one place category.';
   }
@@ -35,6 +35,14 @@ function validateTripForm(payload) {
   };
 }
 
+// function findParentCity(parentsArray) {
+//   for (var i = 0; i < parentsArray.length; i++) {
+//     if (parentsArray[i].level == 'city') return parentsArray[i].name;
+//     else if (parentsArray[i].level == 'town') return parentsArray[i].name;
+
+//   }
+// }
+
 router.get('/suggestions', function(req, res) {
   console.log(JSON.stringify(req.query));
   
@@ -46,45 +54,37 @@ router.get('/suggestions', function(req, res) {
       message: validationResult.message,
       errors: validationResult.errors
     });
-  } else {
-    console.log("attempting request");
+  // } else {
+  //   console.log("attempting request");
     
-    var reply = request.get({
-      url: `${SYGIC_URL}/detect-parents?location=${req.query.ll}`,
-      headers: {'x-api-key': SYGIC_KEY}
-    },
-     (err1, response1, body1) => {
-       var body = JSON.parse(body1);
-      // console.log('err1: '+ err1);
-      // console.log('resp status code: '+ response1.statusCode);
-      // console.log('body status code: '+ body.status_code);
-      // console.log('response1: '+ JSON.stringify(response1));
-      if (err1 || body.status_code != 200) {
-        // console.log('error occurred');
-        // console.log('status code: ' + JSON.stringify(response1));
-        // console.log(body1);
-        
-        console.error(err1);
-        res.status(400).json({
-          success: false,
-          errors: {},
-          message: 'Error making request. Please try again later.'
-        });
+  //   var reply = request.get({
+  //     // url: `${SYGIC_URL}/detect-parents?location=${req.query.ll}`,
+  //     url: `${SYGIC_URL}/list?query=${req.query.place}`,
+  //     headers: {'x-api-key': SYGIC_KEY}
+  //   },
+  //    (err1, response1, body1) => {
+  //      var body = JSON.parse(body1);
+
+  //     if (err1 || body.status_code != 200) {        
+  //       console.error(err1);
+  //       res.status(400).json({
+  //         success: false,
+  //         errors: {},
+  //         message: 'Error making request. Please try again later.'
+  //       });
       } else {
         // console.log('resp1: '+body1);
         // console.log("attempting request #2");
-        var parentId = body.data.places[0].id;
+        // var parentId = findParentCity(body.data.places);
         // console.log('parentId: '+parentId);
         var reply = request.get({
-          url: `${SYGIC_URL}/list?parents=${parentId}&categories=${req.query.categoryIds}&limit=20`,
+          url: `${SYGIC_URL}/list?query=${req.query.place}&categories=${req.query.categoryIds}&limit=20`,
           headers: {'x-api-key': SYGIC_KEY}
         },
         (err2, response2, body2) => {
-          // console.log('kncksnakc');
           var body = JSON.parse(body2);
-          // console.log('resp2: '+body2);
-          if (err2 || body.status_code != 200) {
-            console.log('error occurred');
+          if (err2 || response2.statusCode != 200 || body.status_code != 200) {
+            console.log('error occurred: ' + err2);
             res.status(400).json({
               success: false,
               errors: {},
@@ -98,8 +98,8 @@ router.get('/suggestions', function(req, res) {
           }
         });
       }
-    });
-  }
+    // }); //
+  // }
 });
 
 module.exports = router;
