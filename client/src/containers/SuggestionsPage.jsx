@@ -4,8 +4,6 @@ import { Card, CardTitle, CardHeader, CardText, CardActions, CardMedia } from 'm
 import FlatButton from 'material-ui/FlatButton';
 import SuggestionsMap from '../components/SuggestionsMap.jsx';
 
-// import Suggestions from '../components/Suggestions.jsx';
-
 
 class SuggestionsPage extends React.Component {
 
@@ -23,10 +21,7 @@ class SuggestionsPage extends React.Component {
     }
     this.state = {
       selected: {lat:this.lattitude, lng: this.longitude}
-    }
-
-    // this.createSuggestionBoxes = this.createSuggestionBoxes.bind(this);
-    
+    }    
   }
 
   getIconUrl(icon) {
@@ -53,9 +48,6 @@ class SuggestionsPage extends React.Component {
   
 
   createSuggestion = (place,index) => {
-    // console.log(place.name)
-    // console.log(place.url)
-
     var urlBtn = place.url ? <CardActions><FlatButton label="Website" href={place.url}/></CardActions> : "";
 
     // var iconUrl = this.getIconUrl(place.categories[0].icon);
@@ -66,6 +58,7 @@ class SuggestionsPage extends React.Component {
         subtitle={place.categories[0]}
         avatar={place.thumbnail_url}
       /> : <CardHeader title={place.name} subtitle={place.categories[0]}/>;
+    
     var media = place.thumbnail_url ? (
       <CardMedia overlay={
         <CardTitle 
@@ -74,7 +67,7 @@ class SuggestionsPage extends React.Component {
         />}>
         <img className="suggestions-img" src={place.thumbnail_url} alt="" />
       </CardMedia>) : "";
-    // console.log("location: "+JSON.stringify(place.location));
+
     var classes = "suggestion-box" + ((this.state.selected == place.location) ? " active" : "");
 
     return (
@@ -89,43 +82,6 @@ class SuggestionsPage extends React.Component {
     this.data.places.map(this.createSuggestion)
   )
 
-  // createSuggestionBoxes() {
-  //   this.data.venues.map((venue, index) => (
-  //     // console.log(venue.name);
-  //     <div>{JSON.stringify(venue.name)}</div>
-  //         <Card className="suggestion-container" key={index}>
-  //           <CardTitle
-  //             title={venue.name}
-  //             // subtitle="Select from the following suggestions:"
-  //             avatar={this.getIconUrl(venue.categories[0].icon)}
-  //           />
-  //           <CardActions>
-  //             <FlatButton label="Website" href={venue.url}/>
-  //           </CardActions>
-          
-  //         </Card>
-  //   ));
-  // }
-
-  /**
-   * This method will be executed after initial rendering.
-   */
-  // componentDidMount() {
-  //   const xhr = new XMLHttpRequest();
-  //   xhr.open('get', '/api/dashboard');
-  //   xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-  //   // set the authorization HTTP header
-  //   xhr.setRequestHeader('Authorization', `bearer ${Auth.getToken()}`);
-  //   xhr.responseType = 'json';
-  //   xhr.addEventListener('load', () => {
-  //     if (xhr.status === 200) {
-  //       this.setState({
-  //         secretData: xhr.response.message
-  //       });
-  //     }
-  //   });
-  //   xhr.send();
-  // }
 
   /**
    * Render the component.

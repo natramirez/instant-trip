@@ -16,7 +16,7 @@ const MyMapComponent = compose(
 )((props) =>
   <GoogleMap
     defaultZoom={12}
-    defaultCenter={props.startCoordinates}
+    center={props.startCoordinates}
   >
     {props.isMarkerShown && <Marker position={props.startCoordinates} onClick={props.onMarkerClick} />}
   </GoogleMap>
@@ -34,7 +34,7 @@ class SuggestionsMap extends React.PureComponent {
   delayedShowMarker = () => {
     setTimeout(() => {
       this.setState({ isMarkerShown: true })
-    }, 3000)
+    }, 1000)
   }
 
   handleMarkerClick = () => {
@@ -48,7 +48,6 @@ class SuggestionsMap extends React.PureComponent {
         isMarkerShown={this.state.isMarkerShown}
         onMarkerClick={this.handleMarkerClick}
         startCoordinates={this.props.coordinates}
-        
       />
     )
   }
