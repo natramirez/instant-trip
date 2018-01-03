@@ -45,7 +45,7 @@ a:hover {
 .container {
   margin: 0 auto;
   text-align: center;
-  width: 700px;
+  /* width: 700px; */
 }
 .suggestions-container {
   margin: 0 auto;
@@ -55,17 +55,48 @@ a:hover {
 
 .suggestions-subcontainer {
   display: flex;
-  height: 700px;
+  height: 100vh;
 }
 .suggestions-panel {
   overflow-y: scroll;
-  overflow-x: visible;
-  width: 300px;
+  /* overflow-x: visible; */
+  width: 200px;
 }
+
+.suggestion-container {
+  display: flex;
+  position: relative;
+}
+
+.suggestion-btn-column {
+  position: absolute;
+  right: 0;
+  top: 16px;
+  z-index: 1;
+}
+
+.suggestions-middle {
+  width: 70%;
+}
+
+.suggestions-selected-container {
+  display: flex;
+  overflow-x: scroll;
+}
+.selected-box {
+  width: 200px;
+}
+.selected-box > div > div > img {
+  height: 70px !important;
+  width: 70px !important;
+}
+/* .selected-box > div > div > div{
+  padding-left: 15px;
+} */
 
 .suggestion-box {
   margin: 0 auto;
-  /* width: 250px; */
+  width: 100%;
   text-align: left;
 }
 
@@ -79,8 +110,18 @@ div.suggestion-box.active {
 
 div.suggestion-box img.suggestions-img {
   /* width: 250px !important; */
-  min-width: 200px !important;
-  max-width: 250px !important;
+  /* min-width: 150px !important; */
+  /* max-width: 200px !important; */
+}
+
+.select-suggestion-btn {
+  /* margin-right: 20px; */
+  float: right;
+  z-index: 1000 !important;
+}
+
+.select-suggestion-btn:hover {
+  background-color: lightblue !important;
 }
 
 .suggestions-map {
