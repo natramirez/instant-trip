@@ -42,11 +42,23 @@ a:hover {
   margin: 0 8px;
 }
 
+
 .container {
   margin: 0 auto;
   text-align: center;
   /* width: 700px; */
 }
+
+.checkbox-container {
+  max-width: 550px;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+}
+.checkbox-container > div:first-child {
+  padding-right: 25px;
+}
+
 .suggestions-container {
   margin: 0 auto;
   text-align: center;

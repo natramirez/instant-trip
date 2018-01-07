@@ -25,7 +25,7 @@ import request from 'request';
 // }
 const items = [
   'Sightseeing',
-  'Discovering',
+  // 'Discovering',
   'Eating',
   'Museums',
   'Nightlife',
@@ -36,7 +36,7 @@ const items = [
 ];
 const categories = {
   'Sightseeing':['sightseeing'], //monument/landmark
-  'Discovering':['discovering'], //museums
+  // 'Discovering':['discovering'], //museums
   'Eating':['eating'], //natl park, park
   'Nightlife':['going_out'],
   'Shopping':['shopping'],
@@ -223,9 +223,21 @@ class TripForm extends React.Component {
     />
   )
 
-  createCheckboxes = () => (
-    items.map(this.createCheckbox)
-  )
+  createCheckboxes = () => {
+    // items.map(this.createCheckbox);
+    var halfItems = items.length/2;
+    if (items.length % halfItems != 0) {
+      halfItems++;
+    }
+    var firstHalf = items.slice(0,halfItems);
+    var secondHalf = items.slice(halfItems);
+
+    var checkboxContainers = 
+    [<div>{firstHalf.map(this.createCheckbox)}</div>,
+    <div>{secondHalf.map(this.createCheckbox)}</div>];
+
+    return checkboxContainers;
+  }
   /**
    * Render the component.
    */
@@ -253,7 +265,7 @@ class TripForm extends React.Component {
       /> */}
       <div>
         <p>What types of places do you want to visit?</p>
-        <div style={{maxWidth: 550, margin: 'auto'}}>
+        <div className="checkbox-container">
           {this.createCheckboxes()}
         </div>
       </div>
