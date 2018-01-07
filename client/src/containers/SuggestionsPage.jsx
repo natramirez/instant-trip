@@ -255,7 +255,7 @@ class SuggestionsPage extends React.Component {
           </div>
         </div>
         <div className="suggestions-panel">
-        {this.createSuggestionBoxes()}
+        {/* {this.createSuggestionBoxes()} */}
         </div>
       </div>
     </Card>
