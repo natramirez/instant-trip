@@ -52,6 +52,9 @@ a:hover {
   text-align: center;
   /* width: 700px; */
 }
+.suggestions-container > div > div > span {
+  font-size: 16px !important;
+}
 
 .suggestions-subcontainer {
   display: flex;

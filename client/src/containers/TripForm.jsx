@@ -27,9 +27,12 @@ const items = [
   'Sightseeing',
   'Discovering',
   'Eating',
+  'Museums',
   'Nightlife',
   'Shopping',
-  'Outdoors'
+  'Outdoors',
+  'Historical',
+  'Theme Parks'
 ];
 const categories = {
   'Sightseeing':['sightseeing'], //monument/landmark
@@ -38,7 +41,30 @@ const categories = {
   'Nightlife':['going_out'],
   'Shopping':['shopping'],
   'Outdoors':['hiking','doing_sports']
-  
+}
+const itemsWithoutCategories = [
+  'Historical',
+  'Theme Parks'
+]
+const itemsWithTags = [
+  // 'Sightseeing',
+  'Museums',
+  'Nightlife',
+  'Eating',
+  'Historical',
+  'Shopping',
+  'Outdoors',
+  'Theme Parks'
+]
+const tags = {
+  // 'Sightseeing':['Sight'],
+  'Museums':['Museum'],
+  'Nightlife':['Night Club','Bar','Pub'],
+  'Eating':['Restaurant','Café'],
+  'Historical':['Historical'],
+  'Shopping':['Shopping Mall'],
+  'Outdoors':['Outdoor','Park'],
+  'Theme Parks':['Zoo','Theme Park','Water Park','Holiday Park']
 }
 
 class TripForm extends React.Component {
@@ -89,25 +115,36 @@ class TripForm extends React.Component {
 
     //transform data appropriately first
     var that = this;
-    console.log('woooo')
     geocodeByAddress(this.state.address)
       .then(results => getLatLng(results[0]))
       .then(coordinates => {
+        console.log('Success', coordinates);
+
         var categoryIds = [];
+        var reqTags = [];
         for (const checkbox of this.selectedCheckboxes) {
           console.log(checkbox, 'is selected.');
+          if (itemsWithTags.includes(checkbox)) {
+            reqTags = reqTags.concat(tags[checkbox]);
+          }
           categoryIds = categoryIds.concat(categories[checkbox]);
         }
+        reqTags = encodeURIComponent(reqTags.join('|'));
         categoryIds = encodeURIComponent(categoryIds.join('|'));
         
-        console.log('Success', coordinates);
-        var ll = JSON.stringify(coordinates.lat)+','+JSON.stringify(coordinates.lng);
-        ll = encodeURIComponent(ll);
-        var reqUrl = `/plan/suggestions`;
+        var reqUrl = '/plan/suggestions';
+        var formData = "";
+        if (categoryIds.length == 0) {
+          formData = (reqTags.length != 0) ? `place=${this.state.address}&tags=${reqTags}` : `place=${this.state.address}`;
+        } else if (reqTags.length == 0) {
+          formData = (categoryIds.length != 0) ? `place=${this.state.address}&categoryIds=${categoryIds}` : `place=${this.state.address}`;
+        } else {
+          formData = `place=${this.state.address}&categoryIds=${categoryIds}&tags=${reqTags}`;
+        }
 
         // console.log('requrl: '+ reqUrl);
 
-        const formData = `place=${this.state.address}&categoryIds=${categoryIds}`;
+        // const formData = (reqTags.length != 0) ? `place=${this.state.address}&categoryIds=${categoryIds}&tags=${reqTags}` : `place=${this.state.address}&categoryIds=${categoryIds}`;
         console.log('categoryIds: ' + categoryIds);
 
         // create an AJAX request
@@ -118,7 +155,6 @@ class TripForm extends React.Component {
         xhr.addEventListener('load', () => {
           if (xhr.status === 200) {
             // success
-            console.log('sucessssss');
             console.log(xhr.response);
             // change the component-container state
             // that.setState({
