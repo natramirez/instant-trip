@@ -35,6 +35,13 @@ module.exports = {
       test: /\.css$/,
       use: [ 'style-loader','css-loader' ]
     },
+    {
+      test: /\.less$/,
+      use: [ 'style-loader', // creates style nodes from JS strings
+        'css-loader', // translates CSS into CommonJS
+        'less-loader' // compiles Less to CSS
+      ]
+    },
     { 
       test: /\.json$/, 
       loaders: ['json-loader'] 

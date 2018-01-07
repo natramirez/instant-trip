@@ -1,4 +1,6 @@
 import React from 'react';
+import { PropTypes } from 'prop-types';
+
 // import Auth from '../modules/Auth';
 import { Card, CardTitle, CardHeader, CardText, CardActions, CardMedia } from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
@@ -12,8 +14,8 @@ class SuggestionsPage extends React.Component {
   /**
    * Class constructor.
    */
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
     
     if (this.props.location.state.data) {
       this.place = this.props.location.state.place;
@@ -23,7 +25,8 @@ class SuggestionsPage extends React.Component {
     }
     this.state = {
       active: {lat:this.lattitude, lng: this.longitude}
-    }    
+    }
+    this.makeItinerary = this.makeItinerary.bind(this);
   }
 
   getIconUrl(icon) {
@@ -52,7 +55,6 @@ class SuggestionsPage extends React.Component {
       newArr.push(name);
       this.setState({selected: newArr});
       console.log("updated selected: "+ this.state.selected);
-      
     }
   }
 
@@ -62,12 +64,31 @@ class SuggestionsPage extends React.Component {
     if (index != -1) {
       var newArray = this.state.selected;
       newArray.splice(index, 1);
+      var curActive = this.state.active;
       // newArr.push(name);
-      this.setState({selected: newArray});
+      this.setState({selected: newArray, active: curActive});
       // console.log("updated selected: "+ this.state.selected);
       
     }
   }
+
+  /*
+  makeItinerary output: 
+  data: [
+    {
+      date: "01/27/18"
+      [
+        {},
+        {},
+        {},
+
+
+      ]
+    },
+    {[]},{[]}
+  ]
+
+  */
 
   
   // getPrimaryCategory(categories) {
@@ -101,10 +122,13 @@ class SuggestionsPage extends React.Component {
     var classes = "selected-box" + ((this.state.active == place.location) ? " active" : "");
     return (
       <div className="suggestion-container">
-      <Card className={classes} key={index} onClick={this.onClick.bind(this, place.location)}>
+      <Card className={classes} key={index} >
         {header}
-        <FloatingActionButton onClick={this.removeSelection.bind(this, place)}/>
-        {/* {media} */}
+        <FloatingActionButton 
+        mini={true}
+        className="delete-selected-btn"
+        onClick={this.removeSelection.bind(this, place)}>
+        X</FloatingActionButton>
       </Card>
       </div>
   )};
@@ -148,8 +172,10 @@ class SuggestionsPage extends React.Component {
       <div className="suggestion-btn-column">
         <FloatingActionButton 
           mini={true} 
-          className="select-suggestion-btn" 
-          onClick={this.selectSuggestion.bind(this, place)}> 
+          className="select-suggestion-btn"
+          title="Add to my sightseeing list"
+          onClick={this.selectSuggestion.bind(this, place)}>
+          
           <ContentAdd/> 
         </FloatingActionButton>
       </div>
@@ -160,6 +186,48 @@ class SuggestionsPage extends React.Component {
     this.data.places.map(this.createSuggestion)
   )
 
+
+  makeItinerary() {
+    // var reqUrl = `/plan/suggestions`;
+    // const formData = `place=${this.state.address}&categoryIds=${categoryIds}`;
+
+    // // create an AJAX request
+    // const xhr = new XMLHttpRequest();
+    // xhr.open('get', '/plan/suggestions?' + formData);
+    // xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    // xhr.responseType = 'json';
+    // xhr.addEventListener('load', () => {
+    //   if (xhr.status === 200) {
+    //     // success
+    //     console.log('sucessssss');
+    //     console.log(xhr.response);
+
+        // change the current URL to /
+        console.log("router: " + this.context.router);
+        console.log("context: " + JSON.stringify(this.context));
+        this.context.router.push({ //browserHistory.push should also work here
+          pathname: '/itinerary',
+          // state: {
+          //   place: that.state.address,
+          //   lat: coordinates.lat,
+          //   lng: coordinates.lng,
+          //   data: xhr.response.response.data
+          // }
+        });
+    //   } else {
+    //     // failure
+    //     console.log('faill, errors: ' + JSON.stringify(xhr.response.errors) + ', message: ' + xhr.response.message);
+    //     // change the component state
+    //     const errors = xhr.response.errors ? xhr.response.errors : {};
+    //     errors.summary = xhr.response.message;
+
+    //     that.setState({
+    //       errors
+    //     });
+    //   }
+    // });
+    // xhr.send();
+  }
 
   /**
    * Render the component.
@@ -180,7 +248,7 @@ class SuggestionsPage extends React.Component {
           <CardTitle
             // title={"My sightseeing list:"}
             subtitle={"My sightseeing list:"}
-          ><FloatingActionButton>Make my itinerary</FloatingActionButton></CardTitle>
+          ><FloatingActionButton className="make-itinerary-btn" onClick={this.makeItinerary}>Make my itinerary</FloatingActionButton></CardTitle>
           <div className="suggestions-selected-container">
           {this.createSelectedBoxes()}
           </div>
@@ -194,5 +262,9 @@ class SuggestionsPage extends React.Component {
     );
   }
 }
+
+SuggestionsPage.contextTypes = {
+  router: PropTypes.object.isRequired
+};
 
 export default SuggestionsPage;
