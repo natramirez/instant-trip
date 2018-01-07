@@ -4,7 +4,7 @@ import TripForm from '../containers/TripForm.jsx'
 
 
 const HomePage = () => (
-  <Card className="container">
+  <Card className="homepage-container">
     <CardTitle title="Instant Trip" subtitle="Please enter your trip details below." />
     <TripForm />
   </Card>

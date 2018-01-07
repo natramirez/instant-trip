@@ -43,10 +43,14 @@ a:hover {
 }
 
 
-.container {
+.homepage-container {
   margin: 0 auto;
   text-align: center;
-  /* width: 700px; */
+  width: 700px;
+}
+
+.homepage-container > div > div:nth-child(2) > form > p {
+  padding-bottom: 25px;
 }
 
 .checkbox-container {
