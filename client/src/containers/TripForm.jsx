@@ -253,7 +253,7 @@ class TripForm extends React.Component {
       {this.state.errors.summary && <p className="error-message">{this.state.errors.summary}</p>}
       <div>
         <p>Which city are you traveling to?</p>
-      <PlacesSearchBox setParentPlacesState={this.setParentPlacesState} />
+      <PlacesSearchBox setParentPlacesState={this.setParentPlacesState} placeholder={'e.g. San Francisco, CA'} types={'cities'}/>
       </div>
       <div>
         <p>What dates will you be traveling?</p>
