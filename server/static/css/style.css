@@ -74,7 +74,7 @@ a:hover {
 
 .suggestions-subcontainer {
   display: flex;
-  height: 100vh;
+  height: 84vh;
 }
 .suggestions-panel {
   overflow-y: scroll;
@@ -163,7 +163,7 @@ div.suggestion-box img.suggestions-img {
 }
 
 .calendar-container {
-  height: 800px;
+  height: 84vh;
 }
 
 .card-heading {
