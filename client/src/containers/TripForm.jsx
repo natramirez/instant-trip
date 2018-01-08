@@ -131,15 +131,18 @@ class TripForm extends React.Component {
         }
         reqTags = encodeURIComponent(reqTags.join('|'));
         categoryIds = encodeURIComponent(categoryIds.join('|'));
-        
+        var coords = JSON.stringify(coordinates.lat) +","+ JSON.stringify(coordinates.lng);
+        console.log("coords: "+coords);
+
+        // coordinates = encodeURIComponent(coordinates);
         var reqUrl = '/plan/suggestions';
         var formData = "";
         if (categoryIds.length == 0) {
-          formData = (reqTags.length != 0) ? `place=${this.state.address}&tags=${reqTags}` : `place=${this.state.address}`;
+          formData = (reqTags.length != 0) ? `ll=${coords}&tags=${reqTags}` : `ll=${coords}`;
         } else if (reqTags.length == 0) {
-          formData = (categoryIds.length != 0) ? `place=${this.state.address}&categoryIds=${categoryIds}` : `place=${this.state.address}`;
+          formData = (categoryIds.length != 0) ? `ll=${coords}&categoryIds=${categoryIds}` : `ll=${coords}`;
         } else {
-          formData = `place=${this.state.address}&categoryIds=${categoryIds}&tags=${reqTags}`;
+          formData = `ll=${coords}&categoryIds=${categoryIds}&tags=${reqTags}`;
         }
 
         // console.log('requrl: '+ reqUrl);

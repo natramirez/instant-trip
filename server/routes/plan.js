@@ -17,7 +17,7 @@ function validateTripForm(payload) {
   let isFormValid = true;
   let message = '';
 
-  if (!payload || !payload.place) {
+  if (!payload || !payload.ll) {
     isFormValid = false;
     errors.city = 'Please provide a travel destination.';
   }
@@ -48,6 +48,7 @@ router.get('/suggestions', function(req, res) {
     });
   } else {
     var limit = 30;
+    var radius = 30000;
     var params = '';
     if (req.query.categoryIds) {
       if (req.query.tags) {
@@ -59,7 +60,7 @@ router.get('/suggestions', function(req, res) {
       params = `&tags=${req.query.tags}`;
     }
     var reply = request.get({
-      url: `${SYGIC_URL}/list?query=${req.query.place}${params}&limit=${limit}`,
+      url: `${SYGIC_URL}/list?area=${req.query.ll},${radius}${params}&limit=${limit}`,
       headers: {'x-api-key': SYGIC_KEY}
     },
     (err2, response2, body2) => {
