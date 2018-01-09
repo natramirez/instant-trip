@@ -7,6 +7,7 @@ import { browserHistory, Router } from 'react-router';
 import routes from './routes.js';
 import 'react-dates/initialize';
 import 'react-dates/lib/css/_datepicker.css';
+import '../../server/static/css/react_dates_overrides.css'
 
 
 // remove tap delay, essential for MaterialUI to work properly
