@@ -25,7 +25,6 @@ import request from 'request';
 // }
 const items = [
   'Sightseeing',
-  // 'Discovering',
   'Eating',
   'Museums',
   'Nightlife',
@@ -35,35 +34,34 @@ const items = [
   'Theme Parks'
 ];
 const categories = {
-  'Sightseeing':['sightseeing'], //monument/landmark
-  // 'Discovering':['discovering'], //museums
-  'Eating':['eating'], //natl park, park
+  'Sightseeing':['sightseeing'],
+  'Eating':['eating'],
   'Nightlife':['going_out'],
   'Shopping':['shopping'],
   'Outdoors':['hiking','doing_sports']
 }
 const itemsWithoutCategories = [
   'Historical',
-  'Theme Parks'
+  'Theme Parks',
 ]
 const itemsWithTags = [
   // 'Sightseeing',
   'Museums',
-  'Nightlife',
-  'Eating',
+  // 'Nightlife',
+  // 'Eating',
   'Historical',
-  'Shopping',
-  'Outdoors',
+  // 'Shopping',
+  // 'Outdoors',
   'Theme Parks'
 ]
 const tags = {
   // 'Sightseeing':['Sight'],
   'Museums':['Museum'],
-  'Nightlife':['Night Club','Bar','Pub'],
-  'Eating':['Restaurant','Café'],
+  // 'Nightlife':['Night Club','Bar','Pub'],
+  // 'Eating':['Restaurant','Café'],
   'Historical':['Historical'],
-  'Shopping':['Shopping Mall'],
-  'Outdoors':['Outdoor','Park'],
+  // 'Shopping':['Shopping Mall'],
+  // 'Outdoors':['Outdoor','Park'],
   'Theme Parks':['Zoo','Theme Park','Water Park','Holiday Park']
 }
 
@@ -100,6 +98,7 @@ class TripForm extends React.Component {
     this.setState({ address })
   }
   setParentDatesState({ startDate, endDate }) {
+    
     this.setState({ startDate, endDate });
   }
 
@@ -144,10 +143,6 @@ class TripForm extends React.Component {
         } else {
           formData = `ll=${coords}&categoryIds=${categoryIds}&tags=${reqTags}`;
         }
-
-        // console.log('requrl: '+ reqUrl);
-
-        // const formData = (reqTags.length != 0) ? `place=${this.state.address}&categoryIds=${categoryIds}&tags=${reqTags}` : `place=${this.state.address}&categoryIds=${categoryIds}`;
         console.log('categoryIds: ' + categoryIds);
 
         // create an AJAX request
@@ -175,7 +170,10 @@ class TripForm extends React.Component {
                 place: that.state.address,
                 lat: coordinates.lat,
                 lng: coordinates.lng,
-                data: xhr.response.response.data
+                data: xhr.response.response.data,
+                startDate: that.state.startDate,
+                endDate: that.state.endDate
+
               }
             });
           } else {
