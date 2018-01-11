@@ -120,11 +120,11 @@ a:hover {
 }
 
 div.suggestion-box:hover {
-  background-color: red !important;
+  background-color: lightblue !important;
 }
 
 div.suggestion-box.active {
-  background-color: red !important;
+  background-color: lightblue !important;
 }
 
 div.suggestion-box img.suggestions-img {

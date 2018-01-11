@@ -1,5 +1,9 @@
 const express = require('express');
 const request = require('request');
+const geoTz = require('geo-tz');
+const moment = require('moment');
+const async = require('async');
+
 // const config = require('../../config');
 const router = new express.Router();
 
@@ -10,7 +14,12 @@ const router = new express.Router();
 // var FOURSQUARE_SEARCH_URL = 'https://api.foursquare.com/v2/venues/search';
 
 var SYGIC_URL = 'https://api.sygictravelapi.com/1.0/en/places/';
+var SYGIC_OPT_URL = 'https://optimization.api.sygic.com/v0/api/optimization?key='
+var SYGIC_MAPS_KEY = '2GfhK6NKpYTWWs49EgF5wpnMS';
 var SYGIC_KEY = 'EC6mGz7Pmv4Ora08FjLze3utwMvd95QpabXIijYH';
+
+var MAX_WAIT_TIME = '00:05:00'; //max wait time user waitsupon arrival before place opens:  5 minutes
+var AVG_DURATION_TIME = '01:00:00'; //avg time spent at each place
 
 function validateTripForm(payload) {
   const errors = {};
@@ -59,6 +68,7 @@ router.get('/suggestions', function(req, res) {
     } else if (req.query.tags) {
       params = `&tags=${req.query.tags}`;
     }
+    // console.log("body parents: " + JSON.stringify(body.data.places.parent_ids));
     var reply = request.get({
       url: `${SYGIC_URL}/list?area=${req.query.ll},${radius}${params}&limit=${limit}`,
       headers: {'x-api-key': SYGIC_KEY}
@@ -80,6 +90,584 @@ router.get('/suggestions', function(req, res) {
       }
     });
   }
+    // });
+  // }
 });
+
+// function getTimeZone(lat, lng) {
+//   return geoTz.tz(lat, lng); // e.g. 'America/Los_Angeles'
+// }
+
+function convertFormat(time) {
+  // var inputFormat = 'YYYY-MM-DDTHH:mm:ss:SSSZ';
+  // var outputFormat = 'YYYY-MM-DDTHH:mm:ssZ';
+  return moment(time).toISOString().replace(/\.\d+Z/,'Z');
+}
+
+function convertSecondsToHoursFormat(duration) {
+  var date = new Date(null);
+  date.setSeconds(duration); // specify value for SECONDS here
+  var result = date.toISOString().substr(11, 8); //HH:mmm:ss
+  return result; //HH:mm:ss
+}
+
+function makeHoursFormatFromHours(hours, str) {
+  return hours.toString() + ':00:00';
+}
+
+function setMinutesInHoursFormat(mins, str) {
+return str.substr(0,3) + mins.toString();
+}
+
+
+function convertAvailabilityTimeToDate(time, date) {
+  var hour = moment(time).hours();
+  var min = moment(time).minutes();
+  return moment(date).hours(hour).minutes(min).toString();
+}
+const days = ['Daily','Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const amPm = ['am','pm'];
+
+function parseOpeningHoursToArray(string) {
+var arr = string.split(/(:|\t|\n|\r|\s|↵)\W*/);
+var openingHours = 
+[{open:{hours:"",minutes:""},close:{hours:"",minutes:""}},
+{open:{hours:"",minutes:""},close:{hours:"",minutes:""}},
+{open:{hours:"",minutes:""},close:{hours:"",minutes:""}},
+{open:{hours:"",minutes:""},close:{hours:"",minutes:""}},
+{open:{hours:"",minutes:""},close:{hours:"",minutes:""}},
+{open:{hours:"",minutes:""},close:{hours:"",minutes:""}},
+{open:{hours:"",minutes:""},close:{hours:"",minutes:""}}];
+var lastIsNum = false;
+var isDaily = false;
+var curStartDay = 0; //current day range start
+var curEndDay = 0; //current day range end
+var prevIsDayOfWeek = false; //last elem was day of week
+var isOpenTime = true; //next number will be open time
+  // arr.forEach(function(elem) {
+  for (var i = 0; i < arr.length; i++) {
+      var elem = arr[i];
+    
+    if (days.includes(elem)) {
+      console.log("here1")
+
+      if (elem == 'Daily') {
+        isDaily = true;
+      } else {
+        if (prevIsDayOfWeek) {
+          curEndDay = elem;
+        } else {
+          curStartDay = elem; //index of
+        }
+      }
+      if (!isOpenTime) {
+        isOpenTime = true;
+      }
+    } else if (!isNaN(elem)) { //if is number
+      console.log("here2")
+      if (prevIsDayOfWeek) {
+        prevIsDayOfWeek = false;
+      }
+      if (lastIsNum) { //minutes
+        lastIsNum = false;
+        if (isDaily) {
+          openingHours.forEach(function(day) {
+            if (isOpenTime) {
+              day.open.minutes = elem;
+              isOpenTime = false;
+            } else {
+              day.close.minutes = elem;
+            } 
+          });
+        } else if (curEndDay != 0) {
+            var index = curStartDay;
+            while (index <= curEndDay) {
+              if (isOpenTime) {
+                openingHours[index].open.minutes = elem;
+              } else {
+                openingHours[index].close.minutes = elem;
+              }
+              index++;
+            }
+        } else {
+          if (isOpenTime) {
+            openingHours[curStartDay].open.minutes = elem;
+          } else {
+            openingHours[curStartDay].close.minutes = elem;            
+          }
+        }
+      } else { //hours
+        lastIsNum = true;
+        if (isDaily) {
+          openingHours.forEach(function(day) {
+            if (isOpenTime) {
+              day.open.hours = elem;
+              day.open.minutes = '00';
+            } else {
+              day.close.hours = elem;
+              day.close.minutes = '00';
+            }
+          });
+        } else if (curEndDay != 0) {
+            var index = curStartDay;
+            while (index <= curEndDay) {
+              if (isOpenTime) {
+                openingHours[index].open.hours = elem;
+              } else {
+                openingHours[index].close.hours = elem;
+              }
+              index++;
+            }
+        } else {
+          if (isOpenTime) {
+            openingHours[curStartDay].open.hours = elem;
+            openingHours[curStartDay].open.minutes = '00';
+          } else {
+            openingHours[curStartDay].close.hours = elem;   
+            openingHours[curStartDay].close.minutes = '00';
+          }
+        }
+      }
+    } else if (amPm.includes(elem)) {
+      console.log("here3")
+
+      if (elem == 'pm') {
+        if (curEndDay != 0) {
+          var index = curStartDay;
+          while (index <= curEndDay) {
+            if (isOpenTime) {
+              openingHours[index].open.hours = openingHours[index].open.hours + 12;
+            } else {
+              openingHours[index].close.hours = openingHours[index].close.hours + 12;
+            }
+            index++;
+          }
+        } else {
+          if (isOpenTime) {
+            openingHours[curStartDay].open.hours = openingHours[curStartDay].open.hours + 12;
+          } else {
+            openingHours[curStartDay].close.hours = openingHours[curStartDay].close.hours + 12;
+          }
+        }
+      }
+      if (isOpenTime) {
+        isOpenTime = false;
+      } else {
+        curEndDay = 0;
+      }
+      if (lastIsNum) {
+        lastIsNum = false;
+      }
+    } else {
+      console.log("here4")
+
+      return 0;
+    }
+  }
+  // });
+  return openingHours;
+}
+
+function getLocationsArray(start, selected, end, date) {
+  var dayOfWeek = moment(date).day() + 1; //Sun=1 - Sat=7
+  var waypts = [];
+  waypts.push({
+    location_id: 'start',
+    coordinates: start.lat+","+start.lng
+  });
+  if (selected && selected.length > 0) {
+    var index = 0;
+    selected.forEach(function(place) {
+    // console.log("place opening hours: " + place.opening_hours);
+    if (place.response.data.place.opening_hours) {
+      console.log("place opening hours: " + place.response.data.place.opening_hours);
+      var openingHoursArr = parseOpeningHoursToArray(place.response.data.place.opening_hours);
+      console.log(JSON.stringify(openingHoursArr));
+      if (openingHoursArr != 0) {
+        var openHours = openingHoursArr[dayOfWeek].open.hours;
+        var openMins = openingHoursArr[dayOfWeek].open.minutes;
+        var closeHours = openingHoursArr[dayOfWeek].open.hours;
+        var closeMins = openingHoursArr[dayOfWeek].open.minutes;
+  
+        var openingHours = moment(date).hours(openHours);
+        openingHours = moment(date).minutes(openMins);
+        var closingHours = moment(date).hours(closeHours);
+        closingHours = moment(date).minutes(closeMins);
+  
+        // get place opening hours if defined
+        // using date, set the availability start and end times to the corresponding
+        //(check day of week of date and match to parse return array) hours and minutes
+        //
+        // var start = convertAvailabilityTimeToDate(place.opening_hours)
+        waypts.push({
+          location_id: 'stop'+index.toString(),
+          coordinates: place.response.data.place.location.lat+","+place.response.data.place.location.lng, //error handling?
+          availability: {earliest_start: openingHours, latest_end: closingHours} //Transform as needed, format: 2017-03-02T08:00:00Z; earliest_start, latest_end //what if no hours of op?
+        });
+      } else {
+        waypts.push({
+          location_id: 'stop'+index.toString(),
+          coordinates: place.response.data.place.location.lat+","+place.response.data.place.location.lng, //error handling?
+        });
+      }
+    } else {
+      waypts.push({
+        location_id: 'stop'+index.toString(),
+        coordinates: place.response.data.place.location.lat+","+place.response.data.place.location.lng, //error handling?
+      });
+    }
+    // var locationId = 'stop'+index.toString();
+    index++;
+    });
+  }
+  waypts.push({
+    location_id: 'end',
+    coordinates: end.lat+","+end.lng
+  });
+  console.log('waypts'+JSON.stringify(waypts));
+  return waypts;
+}
+
+function getTasksArray(selected) {
+  var tasks = [];
+  // console.log("selected: " + selected);
+  // console.log("selected: " + selected.length);
+  if (selected && selected.length > 0) {
+    var numPlaces = selected.length;
+
+    var index = 0;
+    selected.forEach(function(place) {
+      console.log("place opening hours: " + place.response.data.place.opening_hours);
+      // var locationId = 'stop'+index.toString();
+      var serviceTime = AVG_DURATION_TIME;
+      if (place.response.data.place.duration) {
+        serviceTime = convertSecondsToHoursFormat(place.response.data.place.duration);
+      }
+      var priority;
+      switch (index % 4 ) {
+        case 0:
+          priority = 'critical';
+          break;
+        case 1:
+          priority = 'high';
+          break;
+        case 2:
+          priority = 'normal';
+          break;
+        case 3:
+          priority = 'low';
+          break;
+      }
+      tasks.push({
+        'task_id':'task'+index.toString(),
+        'priority': priority,
+        'activities':[
+          {
+            'activity_type': 'visit',
+            'location_id': 'stop'+index.toString(),
+            'service_time': serviceTime
+          }
+        ],
+      });
+      index++;
+    });
+  }
+  console.log('tasks'+JSON.stringify(tasks));
+
+  return tasks;
+}
+
+router.get('/place-details', function(req, res) {
+  var id = req.query.id;
+  var reply = request.get({
+    url: `${SYGIC_URL}/${id}`,
+    headers: {'x-api-key': SYGIC_KEY}
+  },
+  (err, response, body) => {
+    var body = JSON.parse(body);
+    if (err || response.statusCode != 200 || body.status_code != 200) {
+      console.log('error occurred: ' + err);
+      res.status(400).json({
+        success: false,
+        errors: {},
+        message: 'Error making request. Please try again later.'
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        response: body
+      });
+    }
+  });
+});
+function matchLocationPlaceNames(selected, locationsArr) {
+  // console.log('\nselected at matchLocation:\n'+ JSON.stringify(selected));
+  var matchDict = {};
+  for (var i = 0; i < locationsArr.length; i++) {
+    if (i == 0 || i == locationsArr.length-1) {
+      continue;
+    } else {
+        console.log('\nselected[i] at matchLocation:\n'+ JSON.stringify(selected[i]));
+
+      matchDict[locationsArr[i].location_id] = selected[i-1].response.data.place.name;
+    }
+  }
+  return matchDict;
+}
+// function getPlaceDetails(id) {
+//   var reply = request.get({
+//     url: `${SYGIC_URL}/${id}`,
+//     headers: {'x-api-key': SYGIC_KEY}
+//   },
+//   (err, response, body) => {
+//     var body = JSON.parse(body);
+//     if (err2 || response.statusCode != 200 || body.status_code != 200) {
+//       console.log('error occurred: ' + err);
+//       res.status(400).json({
+//         success: false,
+//         errors: {},
+//         message: 'Error making request. Please try again later.'
+//       });
+//     } else {
+//       res.status(200).json({
+//         success: true,
+//         response: body
+//       });
+//     }
+//   });
+// }
+
+router.post('/itinerary', function(req, res) {
+  console.log(req.body);
+  var body = req.body;
+  
+  // const validationResult = validateTripForm(req.query);
+  
+  // if (!validationResult.success) {
+  //   res.status(400).json({
+  //     success: false,
+  //     message: validationResult.message,
+  //     errors: validationResult.errors
+  //   });
+  // } else {
+
+    var selected = body.selected;
+    // console.log('selected: '+JSON.stringify(selected));
+
+    //  convert times to format: 2017-03-02T08:00:00Z
+    console.log('oldStartDate: '+body.startDate);
+    var startDate = convertFormat(body.startDate);
+    console.log('newStartDate: '+startDate);
+    
+    console.log('oldEndDate: '+body.endDate);
+    var endDate = convertFormat(body.endDate);
+    console.log('newEndDate: '+endDate);
+
+    console.log('oldDayStartTime: '+body.dailyStartTime);
+    var dayStartTime = moment(convertFormat(body.dailyStartTime));
+    console.log('newDayStartTime: '+dayStartTime);
+
+    console.log('oldDayEndTime: '+body.dailyEndTime);
+    var dayEndTime = moment(convertFormat(body.dailyEndTime));
+    console.log('newDayEndTime: '+dayEndTime);
+
+    var startPoint = body.accommodation;
+    var endPoint = body.accommodation;
+  
+    var numDays = Math.abs(moment(startDate).diff(moment(endDate), 'days'))+1;
+    console.log("numDays: " + numDays);
+
+    var daysArray = [];
+    var curDate = startDate;
+    for (var i = 0; i < numDays; i++) {
+      daysArray.push({'date':curDate});
+      curDate = convertFormat(moment(curDate).add(1,'days'));
+    }
+    console.log("daysArray: " + daysArray);
+    // var totalDailyTime =  moment(dayStartTime).diff(moment(dayEndTime), 'seconds');
+    var locationNames;
+
+    async.map(daysArray, function(curDay, callback) {
+      var curDate = curDay.date;
+      console.log("curDate: " + curDate);
+      var startTime = moment(curDate);
+      // startTime = moment(curDate).minutes(moment(dayStartTime).minutes());
+      var endTime = moment(curDate);
+      // endTime = moment(curDate).minutes(moment(dayEndTime).minutes());
+
+      startTime = moment(curDate).set({
+        'hour' : dayStartTime.get('hour'),
+        'minute' : dayStartTime.get('minute')
+      });
+
+      endTime = moment(curDate).set({
+        'hour' : dayEndTime.get('hour'),
+        'minute' : dayEndTime.get('minute')
+      });
+
+      console.log("heree");
+      console.log("startTime: " + startTime);
+
+      console.log("endTime: " + endTime);
+      console.log("selected hereee:\n"+JSON.stringify(selected));
+
+      var locationsArray = getLocationsArray(startPoint, selected, endPoint, curDate);
+      locationNames = matchLocationPlaceNames(selected, locationsArray);
+
+      var formData = {
+        settings:{
+          max_wait_time: MAX_WAIT_TIME
+        },
+        locations: locationsArray,
+        vehicles: [
+          {
+              "vehicle_id": "vehicle",
+              "cost_per_km": 1,
+              "cost_per_hour": 1,
+              "fixed_cost": 5,
+              "start_location_id": "start",
+              "end_location_id": "end",
+              "availability": {
+                  "earliest_start": startTime,
+                  "latest_end": endTime
+              }
+          }
+        ],
+        tasks: getTasksArray(selected)
+      };
+      var reply = request.post({
+        url: `${SYGIC_OPT_URL}${SYGIC_MAPS_KEY}`,
+        // headers: {'Content-type': 'application/json'},
+        json: formData
+      },
+      (err2, response2, body2) => {
+        // var body = JSON.parse(body2);
+        var body = body2;
+        if (err2 || response2.statusCode != 202) {
+          console.log("full response: " + JSON.stringify(response2));
+          console.log("response2.statusCode" + response2.statusCode);
+          // console.log(+)
+          if (body.status != 'OK') {
+            console.log("not OK");
+            console.log("full header: " + JSON.stringify(response2.headers));
+            // console.log("full response: " + JSON.stringify(response2));
+
+
+            console.log("header status: " + response2.status);
+            console.log("state" + body.state);
+            console.log("location" + response2.location);
+            if (body.error) {
+              console.log("error code: "+body.error.code);
+              console.log("error message: "+body.error.message);
+            }
+          }
+          console.log('error occurred: ' + err2);
+          // res.status(400).json({
+          //   success: false,
+          //   errors: {},
+          //   message: 'Error making request. Please try again later.'
+          // });
+        } else {
+          // console.log("sygic response:\n"+JSON.stringify(body));
+          // result returns a url?
+          callback(null,response2.headers.location);
+          // res.status(200).json({
+          //   success: true,
+          //   response: body
+          // });
+        }
+      });
+    }, function(err, urlResultsArr) {
+      if (err) {
+        console.log('error making place details array');
+        res.status(400).json({
+            success: false,
+            errors: {},
+            message: 'Error making request. Please try again later.'
+          });
+      } else {
+        console.log("completed url results: "+JSON.stringify(urlResultsArr));
+
+        async.map(urlResultsArr, function(url, callback) {
+          // var details = this.getPlaceDetails(place.id);
+          // selected.push(details.data.place);
+          setTimeout(function() {
+            var reply = request.get({
+              url: url
+            },
+            (err2, response2, body2) => {
+              // var body = JSON.parse(body2);
+              var body = JSON.parse(body2);
+              if (err2 || response2.statusCode != 200) {
+                console.log("full response: " + response2);
+                console.log("response2.statusCode" + response2.statusCode);
+                console.log('error occurred: ' + err2);
+                // res.status(400).json({
+                //   success: false,
+                //   errors: {},
+                //   message: 'Error making request. Please try again later.'
+                // });
+              } else {
+                
+                console.log("sygic response:\n"+body);
+                callback(null,body);
+              }
+            });
+          }, 2000);
+          
+        }, function(err, results) {
+          if (err) {
+            console.log('error making trip results array');
+          }
+          console.log("completed full results:\n "+JSON.stringify(results));
+          var eventsArr = [];
+
+          for (var i = 0; i < results.length; i++) {
+            var activities = results[i].plan[0].activities;
+            var prevDuration = 0;
+            for (var j = 0; j < activities.length; j++) {
+              if (j == 0 || j == activities.length-1) {
+                continue;
+              }
+              var activity = activities[j];
+              var name = locationNames[activity.location_id];
+              var startDate = moment(activity.timestamp);
+              var year =startDate.year();
+              var month = startDate.month();
+              var date = startDate.date();
+              var hour = startDate.hour();
+              var minute = startDate.minutes();
+              var seconds = startDate.seconds();
+              var starttime = new Date(year,month,date,hour,minute,seconds);
+
+
+              var duration = moment.duration(activity.service_duration);
+              var endDate = moment(activity.timestamp).add(duration);
+              var year =endDate.year();
+              var month = endDate.month();
+              var date = endDate.date();
+              var hour = endDate.hour();
+              var minute = endDate.minutes();
+              var seconds = endDate.seconds();
+              var endtime = new Date(year,month,date,hour,minute,seconds);
+              eventsArr.push(makeEventObject(name,starttime, endtime));
+            }
+          
+          }
+          // make results into events format and return
+
+        res.status(200).json({
+            success: true,
+            response: eventsArr
+          });
+        });
+      }  
+    });
+  });
+
+  function makeEventObject(title, starttime, endtime) {
+    return {title:title, start: starttime, end: endtime};
+  }
+// });
 
 module.exports = router;

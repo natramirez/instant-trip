@@ -1,12 +1,16 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
-
 // import Auth from '../modules/Auth';
 import { Card, CardTitle, CardHeader, CardText, CardActions, CardMedia } from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import ContentAdd from 'material-ui/svg-icons/content/add';
+import { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 import SuggestionsMap from '../components/SuggestionsMap.jsx';
+import StartPointDialogBtn from '../components/StartPointDialog.jsx';
+import moment from 'moment';
+import async from 'async';
+
 
 
 class SuggestionsPage extends React.Component {
@@ -22,11 +26,32 @@ class SuggestionsPage extends React.Component {
       this.lattitude = this.props.location.state.lat;
       this.longitude = this.props.location.state.lng;
       this.data = this.props.location.state.data;
+      this.startDate = this.props.location.state.startDate;
+      this.endDate = this.props.location.state.endDate;
     }
     this.state = {
       active: {lat:this.lattitude, lng: this.longitude}
     }
     this.makeItinerary = this.makeItinerary.bind(this);
+    this.setParentPlacesState = this.setParentPlacesState.bind(this);
+    this.setParentStartTimeState = this.setParentStartTimeState.bind(this);
+    this.setParentEndTimeState = this.setParentEndTimeState.bind(this);
+  }
+
+  setParentPlacesState(address) {
+    console.log("address:"+address)
+    this.setState({ accommodation:address })
+    console.log("accommodation:"+this.state.accommodation)
+  }
+  setParentStartTimeState(time) {
+    this.setState({ dailyStartTime: time });
+    console.log("daily start time:"+this.state.dailyStartTime);
+    
+  }
+  setParentEndTimeState(time) {
+    this.setState({ dailyEndTime: time });
+    console.log("daily end time:"+this.state.dailyEndTime);
+
   }
 
   getIconUrl(icon) {
@@ -71,32 +96,6 @@ class SuggestionsPage extends React.Component {
       
     }
   }
-
-  /*
-  makeItinerary output: 
-  data: [
-    {
-      date: "01/27/18"
-      [
-        {},
-        {},
-        {},
-
-
-      ]
-    },
-    {[]},{[]}
-  ]
-
-  */
-
-  
-  // getPrimaryCategory(categories) {
-  //   for (const cat of categories) {
-  //     console.log('category: ',cat.shortName);
-  //     if (cat.primary) {return cat.shortName}
-  //   }
-  // }
 
   createSelected = (place, index) => {
     console.log("create selected entered")
@@ -186,48 +185,206 @@ class SuggestionsPage extends React.Component {
     this.data.places.map(this.createSuggestion)
   )
 
+  // getWaypoints() {
+  //   var waypts = [];
+  //   if (this.state.selected) {
+  //     this.state.selected.forEach(function(place) {
+  //       waypts.push({
+  //         location: new google.maps.LatLng(place.location.lat, place.location.lng),
+  //         stopover:true
+  //       });
+  //     });
+  //   }
+  //   return waypts;
+  // }
+
+  // makeEvents(waypointOrder) {
+  //   waypointOrder.forEach(function(index) {
+  //     waypoints[index];
+  //   }) {
+
+  //   }
+  // }
+
+  /*
+  for each day
+    for each POI
+      if not open today, add to reject list
+      else add to day list
+    order Day List POI by shortest time open first
+    if time open <= avg duration there 
+      hardcode this place as an event
+    else
+
+
+  */
+
+  // getPlaceDetails(id) {
+  //   // create an AJAX request
+   
+  // }
+
+  makePlaceDetailsArray() {
+    // var selected = [];
+    // this.state.selected.forEach(place => {
+      // var details = this.getPlaceDetails(place.id);
+      // selected.push(details.data.place);
+    // });
+    async.map(this.state.selected, function(place, callback) {
+      // var details = this.getPlaceDetails(place.id);
+      // selected.push(details.data.place);
+      const xhr = new XMLHttpRequest();
+      xhr.open('get', '/plan/place-details?id=' + encodeURIComponent(place.id));
+      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhr.responseType = 'json';
+      xhr.addEventListener('load', () => {
+        if (xhr.status === 200) {
+          // success
+          console.log(xhr.response);
+          callback(null, xhr.response);
+        } else {
+          // failure
+          console.log('error with one of the place details requests');
+          // return 0;
+        }
+      });
+      xhr.send();
+    }, function(err, results) {
+      if (err) {
+        console.log('error making place details array');
+      }
+      console.log("completed results: "+JSON.stringify(results));
+    });
+  }
+ 
 
   makeItinerary() {
-    // var reqUrl = `/plan/suggestions`;
-    // const formData = `place=${this.state.address}&categoryIds=${categoryIds}`;
-
-    // // create an AJAX request
-    // const xhr = new XMLHttpRequest();
-    // xhr.open('get', '/plan/suggestions?' + formData);
-    // xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-    // xhr.responseType = 'json';
-    // xhr.addEventListener('load', () => {
-    //   if (xhr.status === 200) {
-    //     // success
-    //     console.log('sucessssss');
-    //     console.log(xhr.response);
-
-        // change the current URL to /
-        console.log("router: " + this.context.router);
-        console.log("context: " + JSON.stringify(this.context));
-        this.context.router.push({ //browserHistory.push should also work here
-          pathname: '/itinerary',
-          // state: {
-          //   place: that.state.address,
-          //   lat: coordinates.lat,
-          //   lng: coordinates.lng,
-          //   data: xhr.response.response.data
-          // }
-        });
+    // const DirectionsService = new google.maps.DirectionsService();
+    // var departureTime = moment(this.startDate).toDate();
+    // const DEFAULT_DAILY_DEPARTURE_HOUR = 9;
+    // const DEFAULT_DAILY_SIGHTSEEING_HOURS = 10;
+    // departureTime.setHours(DEFAULT_DAILY_DEPARTURE_TIME);
+    // var waypoints = this.getWaypoints();
+    // DirectionsService.route({
+    //   origin: new google.maps.LatLng(41.8507300, -87.6512600),
+    //   destination: new google.maps.LatLng(41.8525800, -87.6514100),
+    //   waypoints: waypoints,
+    //   optimizeWaypoints: true,
+    //   // provideRouteAlternatives: false,
+    //   travelMode: google.maps.TravelMode.DRIVING,
+    //   drivingOptions: {
+    //     departureTime: departureTime,
+    //     trafficModel: 'pessimistic'
+    //   },
+    // }, (result, status) => {
+    //   if (status === google.maps.DirectionsStatus.OK) {
+    //     console.log(`directions result: ${JSON.stringify(result)}`);
+    //     console.log(result.routes[0].waypoint_order);
     //   } else {
-    //     // failure
-    //     console.log('faill, errors: ' + JSON.stringify(xhr.response.errors) + ', message: ' + xhr.response.message);
-    //     // change the component state
-    //     const errors = xhr.response.errors ? xhr.response.errors : {};
-    //     errors.summary = xhr.response.message;
-
-    //     that.setState({
-    //       errors
-    //     });
+    //     console.error(`error fetching directions ${result}`);
     //   }
     // });
-    // xhr.send();
-  }
+    var that = this;
+
+    async.map(this.state.selected, function(place, callback) {
+      // var details = this.getPlaceDetails(place.id);
+      // selected.push(details.data.place);
+      const xhr = new XMLHttpRequest();
+      xhr.open('get', '/plan/place-details?id=' + encodeURIComponent(place.id));
+      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhr.responseType = 'json';
+      xhr.addEventListener('load', () => {
+        if (xhr.status === 200) {
+          // success
+          console.log(xhr.response);
+          callback(null, xhr.response);
+        } else {
+          // failure
+          console.log('error with one of the place details requests');
+          // return 0;
+        }
+      });
+      xhr.send();
+    }, function(err, placeDetailsArr) {
+      if (err) {
+        console.log('error making place details array');
+      } else {
+        console.log("completed results: "+JSON.stringify(placeDetailsArr));
+        geocodeByAddress(that.state.accommodation)
+        .then(results => getLatLng(results[0]))
+        .then(coordinates => {
+          // var reqUrl = `/plan/suggestions`;
+          var formData = {
+            place: {
+              address:that.state.address, 
+              lat:that.lattitude,
+              lng:that.longitude
+            },
+            selected: placeDetailsArr,
+            dailyStartTime: that.state.dailyStartTime,
+            dailyEndTime: that.state.dailyEndTime,
+            startDate: that.startDate,
+            endDate: that.endDate,
+            accommodation: {
+              address: that.state.accommodation,
+              lat: coordinates.lat,
+              lng: coordinates.lng
+            }
+          };
+          // var formData = {place:'hello'};
+
+          // create an AJAX request
+          const xhr = new XMLHttpRequest();
+          xhr.open('post', '/plan/itinerary');
+          xhr.setRequestHeader('Content-type', 'application/json');
+          xhr.responseType = 'json';
+          xhr.addEventListener('load', () => {
+            if (xhr.status === 200) {
+              // success
+              console.log('sucessssss');
+              console.log(xhr.response);
+
+              // change the current URL to /
+              // console.log("router: " + this.context.router);
+              // console.log("context: " + JSON.stringify(this.context));
+              var newEvents = [];
+              for (var i = 0; i < xhr.response.response.length; i++) {
+                var curEvent = xhr.response.response[i];
+                curEvent.start = new Date(curEvent.start);
+                curEvent.end = new Date(curEvent.end);
+                newEvents.push(curEvent);
+              }
+
+              that.context.router.push({ //browserHistory.push should also work here
+                pathname: '/itinerary',
+                state: {
+                  startDate: that.startDate,
+                  endDate: that.endDate,
+                  events: newEvents,
+                  place: that.place
+                  // lat: coordinates.lat,
+                  // lng: coordinates.lng,
+                  // data: xhr.response.response.data
+                }
+              });
+              
+            } else {
+              // failure
+              console.log('faill, errors: ' + JSON.stringify(xhr.response.errors) + ', message: ' + xhr.response.message);
+              // change the component state
+              const errors = xhr.response.errors ? xhr.response.errors : {};
+              errors.summary = xhr.response.message;
+
+              that.setState({
+                errors
+              });
+            }
+          });
+        xhr.send(JSON.stringify(formData));
+        }).catch(error => console.error('Geocoding Error', error))
+      }
+    });
+}
 
   /**
    * Render the component.
@@ -243,19 +400,25 @@ class SuggestionsPage extends React.Component {
         {this.createSuggestionBoxes()}
         </div>
         <div className="suggestions-middle">
-          <SuggestionsMap coordinates={this.state.active}/>
+          <SuggestionsMap coordinates={this.state.active} selected={this.state.selected}/>
           <div>
           <CardTitle
             // title={"My sightseeing list:"}
             subtitle={"My sightseeing list:"}
-          ><FloatingActionButton className="make-itinerary-btn" onClick={this.makeItinerary}>Make my itinerary</FloatingActionButton></CardTitle>
+          ><StartPointDialogBtn 
+              setParentPlacesState={this.setParentPlacesState}
+              setParentStartTimeState={this.setParentStartTimeState}
+              setParentEndTimeState={this.setParentEndTimeState}
+              makeItinerary={this.makeItinerary}
+            />
+          </CardTitle>
           <div className="suggestions-selected-container">
           {this.createSelectedBoxes()}
           </div>
           </div>
         </div>
         <div className="suggestions-panel">
-        {/* {this.createSuggestionBoxes()} */}
+        {this.createSuggestionBoxes()}
         </div>
       </div>
     </Card>

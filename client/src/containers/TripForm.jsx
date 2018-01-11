@@ -2,7 +2,7 @@ import React from 'react';
 import { PropTypes } from 'prop-types';
 import Auth from '../modules/Auth';
 import LoginForm from '../components/LoginForm.jsx';
-import { geocodeByAddress, getLatLng } from 'react-places-autocomplete'
+import { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 import PlacesSearchBox from '../components/PlacesSearchBox';
 import DateRangePickerWrapper from '../components/DateRangePickerWrapper';
 import Checkbox from '../components/Checkbox.jsx';

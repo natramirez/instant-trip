@@ -14,9 +14,21 @@ const DragAndDropCalendar = withDragAndDrop(BigCalendar);
 
 class Dnd extends React.Component {
   constructor (props) {
-    super(props)
+    super(props);
+    console.log("goes here")
+
+    if (this.props.location.state) {
+      console.log("defined!1")
+      this.place = this.props.location.state.place;
+      // this.lattitude = this.props.location.state.lat;
+      // this.longitude = this.props.location.state.lng;
+      this.startDate = this.props.location.state.startDate;
+      this.endDate = this.props.location.state.endDate;
+      // this.accomodation = this.props.location.state.accomodation;
+      // this.data = this.props.location.state.data;
+    }
     this.state = {
-      events: events
+      events: this.props.location.state.events
     }
 
     this.moveEvent = this.moveEvent.bind(this)
@@ -38,7 +50,7 @@ class Dnd extends React.Component {
     alert(`${event.title} was dropped onto ${event.start}`);
   }
 
-  render(){
+  render() {
     return (
       <div className="calendar-container">
       <DragAndDropCalendar
@@ -46,7 +58,7 @@ class Dnd extends React.Component {
         events={this.state.events}
         onEventDrop={this.moveEvent}
         defaultView='week'
-        defaultDate={new Date(2015, 3, 12)}
+        defaultDate={moment(this.startDate).toDate()}
       />
       </div>
     )

@@ -19,6 +19,7 @@
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "file-loader": "^1.1.5",
+    "geo-tz": "^3.3.4",
     "json-loader": "^0.5.7",
     "jsonwebtoken": "^7.4.3",
     "lodash.omit": "^4.5.0",

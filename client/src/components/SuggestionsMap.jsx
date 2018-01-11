@@ -1,6 +1,6 @@
 import React from "react"
-import { compose, withProps } from "recompose"
-import { withScriptjs, withGoogleMap, GoogleMap, Marker } from "react-google-maps"
+import { compose, withProps, withState, withHandlers, lifecycle } from "recompose"
+import { withScriptjs, withGoogleMap, GoogleMap, Marker, DirectionsRenderer } from "react-google-maps"
 
 var GOOGLE_MAPS_KEY = 'AIzaSyA_-LRXLmMWEr6_BfIBSjxxuqEX_vUmxuQ';
 
@@ -11,14 +11,51 @@ const MyMapComponent = compose(
     containerElement: <div className="suggestions-map" />,
     mapElement: <div style={{ height: `100%` }} />,
   }),
+  withState('zoom', 'onBoundsChange', 12),
+  withHandlers(() => {
+    const refs = {
+      map: undefined,
+    }
+
+    return {
+      onMapMounted: () => ref => {
+        refs.map = ref
+      },
+      onBoundsChanged: ({ onBoundsChange }) => () => {
+        onBoundsChange(refs.map.getBounds());
+        console.log("bounds: " + JSON.stringify(refs.map.getBounds()));
+      }
+    }
+  }),
   withScriptjs,
-  withGoogleMap
+  withGoogleMap,
+  lifecycle({
+    componentDidMount() {
+      const DirectionsService = new google.maps.DirectionsService();
+
+      DirectionsService.route({
+        origin: new google.maps.LatLng(41.8507300, -87.6512600),
+        destination: new google.maps.LatLng(41.8525800, -87.6514100),
+        travelMode: google.maps.TravelMode.DRIVING,
+      }, (result, status) => {
+        if (status === google.maps.DirectionsStatus.OK) {
+          this.setState({
+            directions: result,
+          });
+        } else {
+          console.error(`error fetching directions ${result}`);
+        }
+      });
+    }
+  })
 )((props) =>
   <GoogleMap
-    defaultZoom={12}
-    center={props.startCoordinates}
+    defaultZoom={props.zoom}
+    center={props.activeCoordinates}
+    ref={props.onMapMounted}
+    onBoundsChanged={props.onBoundsChanged}
   >
-    {props.isMarkerShown && <Marker position={props.startCoordinates} onClick={props.onMarkerClick} />}
+    {props.isMarkerShown && <Marker position={props.activeCoordinates} onClick={props.onMarkerClick} />}
   </GoogleMap>
 );
 
@@ -47,10 +84,20 @@ class SuggestionsMap extends React.PureComponent {
       <MyMapComponent
         isMarkerShown={this.state.isMarkerShown}
         onMarkerClick={this.handleMarkerClick}
-        startCoordinates={this.props.coordinates}
+        activeCoordinates={this.props.coordinates}
       />
     )
   }
 }
 
 export default SuggestionsMap;
+
+/*
+Initial: no marker, no selected, just center map on coordinates (active)
+Active: marker on active, center map on active coordinates
+Selected: (length == 1) && Active (length == 0): marker on selected ; center map on selected
+Selected (length == 1) && Active (length == 1): marker on active, selected ; center map on active
+Selected (length == 2) : display directions with no waypoints
+Selected (length > 2) : display directions with waypoints
+
+*/
