@@ -488,12 +488,12 @@ router.post('/itinerary', function(req, res) {
       var curDate = curDay.date;
 
       var startTime = moment(curDate).set({
-        'hour' : dayStartTime.get('hour'),
-        'minute' : dayStartTime.get('minute')
+        'hour' : moment(dayStartTime).get('hour'),
+        'minute' : moment(dayStartTime).get('minute')
       });
       var endTime = moment(curDate).set({
-        'hour' : dayEndTime.get('hour'),
-        'minute' : dayEndTime.get('minute')
+        'hour' : moment(dayEndTime).get('hour'),
+        'minute' : moment(dayEndTime).get('minute')
       });
 
       console.log("startTime: " + startTime);
