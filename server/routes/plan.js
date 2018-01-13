@@ -98,7 +98,7 @@ router.get('/suggestions', function(req, res) {
 //   return geoTz.tz(lat, lng); // e.g. 'America/Los_Angeles'
 // }
 
-function convertFormat(time) {
+function convertFormat(time) {//always keep in utc
   return moment(time).toISOString().replace(/\.\d+Z/,'Z');
 }
 
@@ -453,20 +453,16 @@ router.post('/itinerary', function(req, res) {
 
     //  convert times to format: 2017-03-02T08:00:00Z
     console.log('oldStartDate: '+body.startDate);
-    var startDate = convertFormat(body.startDate);
+    var startDate = moment(body.startDate).utc().format();
     console.log('newStartDate: '+startDate);
     
     console.log('oldEndDate: '+body.endDate);
-    var endDate = convertFormat(body.endDate);
+    var endDate = moment(body.endDate).utc().format();
     console.log('newEndDate: '+endDate);
 
-    console.log('oldDayStartTime: '+body.dailyStartTime);
-    var dayStartTime = moment(convertFormat(body.dailyStartTime)).format();
-    console.log('newDayStartTime: '+dayStartTime);
+    // console.log('oldDayStartTime: '+body.dailyStartTime);
+    // console.log('oldDayEndTime: '+body.dailyEndTime);
 
-    console.log('oldDayEndTime: '+body.dailyEndTime);
-    var dayEndTime = moment(convertFormat(body.dailyEndTime)).format();
-    console.log('newDayEndTime: '+dayEndTime);
 
     var startPoint = body.accommodation;
     var endPoint = body.accommodation;
@@ -488,16 +484,16 @@ router.post('/itinerary', function(req, res) {
       var curDate = curDay.date;
 
       var startTime = moment(curDate).set({
-        'hour' : moment(dayStartTime).get('hour'),
-        'minute' : moment(dayStartTime).get('minute')
+        'hour' : moment(body.dailyStartTime).utc().hour(),
+        'minute' : moment(body.dailyStartTime).utc().minute()
       });
       var endTime = moment(curDate).set({
-        'hour' : moment(dayEndTime).get('hour'),
-        'minute' : moment(dayEndTime).get('minute')
+        'hour' : moment(body.dailyEndTime).utc().hour(),
+        'minute' : moment(body.dailyEndTime).utc().minute()
       });
 
-      console.log("startTime: " + startTime);
-      console.log("endTime: " + endTime);
+      console.log("startTime: " + startTime.format());
+      console.log("endTime: " + endTime.format());
 
       var locationsArray = getLocationsArray(startPoint, selected, endPoint, curDate);
       locationNames = matchLocationPlaceNames(selected, locationsArray);
