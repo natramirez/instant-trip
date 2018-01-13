@@ -461,11 +461,11 @@ router.post('/itinerary', function(req, res) {
     console.log('newEndDate: '+endDate);
 
     console.log('oldDayStartTime: '+body.dailyStartTime);
-    var dayStartTime = moment(convertFormat(body.dailyStartTime));
+    var dayStartTime = moment(convertFormat(body.dailyStartTime)).format();
     console.log('newDayStartTime: '+dayStartTime);
 
     console.log('oldDayEndTime: '+body.dailyEndTime);
-    var dayEndTime = moment(convertFormat(body.dailyEndTime));
+    var dayEndTime = moment(convertFormat(body.dailyEndTime)).format();
     console.log('newDayEndTime: '+dayEndTime);
 
     var startPoint = body.accommodation;
@@ -481,7 +481,7 @@ router.post('/itinerary', function(req, res) {
       curDate = convertFormat(moment(curDate).add(1,'days'));
     }
     console.log("daysArray: " + daysArray);
-    
+
     var locationNames;
 
     async.map(daysArray, function(curDay, callback) {
@@ -579,7 +579,7 @@ router.post('/itinerary', function(req, res) {
               // var body = JSON.parse(body2);
               var body = JSON.parse(body2);
               if (err2 || response2.statusCode != 200 || body.state == 'Failed') {
-                console.log("full response: " + response2);
+                console.log("full response: " + JSON.stringify(response2));
                 console.log("response2.statusCode" + response2.statusCode);
                 console.log("body.state: " + body.state);
                 console.log('error occurred: ' + err2);
