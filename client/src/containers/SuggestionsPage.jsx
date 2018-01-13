@@ -150,14 +150,8 @@ class SuggestionsPage extends React.Component {
         // avatar={place.thumbnail_url}
       /> : <CardHeader title={place.name} subtitle={place.categories[0]}/>;
     
-    var media = place.thumbnail_url ? (
-      <CardMedia>
-       {/* <CardMedia overlay={
-        <CardTitle 
-        title={place.name}
-        subtitle={place.categories}
-        />} */}
-        {/* > */}
+    var media = place.thumbnail_url ? 
+    (<CardMedia>
         <img className="suggestions-img" src={place.thumbnail_url} alt="" />
       </CardMedia>) : "";
 
@@ -200,14 +194,6 @@ class SuggestionsPage extends React.Component {
   //   return waypts;
   // }
 
-  // makeEvents(waypointOrder) {
-  //   waypointOrder.forEach(function(index) {
-  //     waypoints[index];
-  //   }) {
-
-  //   }
-  // }
-
   /*
   for each day
     for each POI
@@ -221,44 +207,6 @@ class SuggestionsPage extends React.Component {
 
   */
 
-  // getPlaceDetails(id) {
-  //   // create an AJAX request
-   
-  // }
-
-  makePlaceDetailsArray() {
-    // var selected = [];
-    // this.state.selected.forEach(place => {
-      // var details = this.getPlaceDetails(place.id);
-      // selected.push(details.data.place);
-    // });
-    async.map(this.state.selected, function(place, callback) {
-      // var details = this.getPlaceDetails(place.id);
-      // selected.push(details.data.place);
-      const xhr = new XMLHttpRequest();
-      xhr.open('get', '/plan/place-details?id=' + encodeURIComponent(place.id));
-      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-      xhr.responseType = 'json';
-      xhr.addEventListener('load', () => {
-        if (xhr.status === 200) {
-          // success
-          console.log(xhr.response);
-          callback(null, xhr.response);
-        } else {
-          // failure
-          console.log('error with one of the place details requests');
-          // return 0;
-        }
-      });
-      xhr.send();
-    }, function(err, results) {
-      if (err) {
-        console.log('error making place details array');
-      }
-      console.log("completed results: "+JSON.stringify(results));
-    });
-  }
- 
 
   makeItinerary() {
     // const DirectionsService = new google.maps.DirectionsService();
@@ -289,8 +237,6 @@ class SuggestionsPage extends React.Component {
     var that = this;
 
     async.map(this.state.selected, function(place, callback) {
-      // var details = this.getPlaceDetails(place.id);
-      // selected.push(details.data.place);
       const xhr = new XMLHttpRequest();
       xhr.open('get', '/plan/place-details?id=' + encodeURIComponent(place.id));
       xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
@@ -333,7 +279,6 @@ class SuggestionsPage extends React.Component {
               lng: coordinates.lng
             }
           };
-          // var formData = {place:'hello'};
 
           // create an AJAX request
           const xhr = new XMLHttpRequest();

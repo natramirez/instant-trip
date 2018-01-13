@@ -99,16 +99,14 @@ router.get('/suggestions', function(req, res) {
 // }
 
 function convertFormat(time) {
-  // var inputFormat = 'YYYY-MM-DDTHH:mm:ss:SSSZ';
-  // var outputFormat = 'YYYY-MM-DDTHH:mm:ssZ';
   return moment(time).toISOString().replace(/\.\d+Z/,'Z');
 }
 
 function convertSecondsToHoursFormat(duration) {
   var date = new Date(null);
-  date.setSeconds(duration); // specify value for SECONDS here
+  date.setSeconds(duration);
   var result = date.toISOString().substr(11, 8); //HH:mmm:ss
-  return result; //HH:mm:ss
+  return result;
 }
 
 function makeHoursFormatFromHours(hours, str) {
@@ -452,7 +450,6 @@ router.post('/itinerary', function(req, res) {
   // } else {
 
     var selected = body.selected;
-    // console.log('selected: '+JSON.stringify(selected));
 
     //  convert times to format: 2017-03-02T08:00:00Z
     console.log('oldStartDate: '+body.startDate);
@@ -484,32 +481,23 @@ router.post('/itinerary', function(req, res) {
       curDate = convertFormat(moment(curDate).add(1,'days'));
     }
     console.log("daysArray: " + daysArray);
-    // var totalDailyTime =  moment(dayStartTime).diff(moment(dayEndTime), 'seconds');
+    
     var locationNames;
 
     async.map(daysArray, function(curDay, callback) {
       var curDate = curDay.date;
-      console.log("curDate: " + curDate);
-      var startTime = moment(curDate);
-      // startTime = moment(curDate).minutes(moment(dayStartTime).minutes());
-      var endTime = moment(curDate);
-      // endTime = moment(curDate).minutes(moment(dayEndTime).minutes());
 
-      startTime = moment(curDate).set({
+      var startTime = moment(curDate).set({
         'hour' : dayStartTime.get('hour'),
         'minute' : dayStartTime.get('minute')
       });
-
-      endTime = moment(curDate).set({
+      var endTime = moment(curDate).set({
         'hour' : dayEndTime.get('hour'),
         'minute' : dayEndTime.get('minute')
       });
 
-      console.log("heree");
       console.log("startTime: " + startTime);
-
       console.log("endTime: " + endTime);
-      // console.log("selected hereee:\n"+JSON.stringify(selected));
 
       var locationsArray = getLocationsArray(startPoint, selected, endPoint, curDate);
       locationNames = matchLocationPlaceNames(selected, locationsArray);
@@ -537,7 +525,6 @@ router.post('/itinerary', function(req, res) {
       };
       var reply = request.post({
         url: `${SYGIC_OPT_URL}${SYGIC_MAPS_KEY}`,
-        // headers: {'Content-type': 'application/json'},
         json: formData
       },
       (err2, response2, body2) => {
@@ -546,35 +533,28 @@ router.post('/itinerary', function(req, res) {
         if (err2 || response2.statusCode != 202) {
           console.log("full response: " + JSON.stringify(response2));
           console.log("response2.statusCode" + response2.statusCode);
-          // console.log(+)
           if (body.status != 'OK') {
             console.log("not OK");
             console.log("full header: " + JSON.stringify(response2.headers));
-            // console.log("full response: " + JSON.stringify(response2));
-
 
             console.log("header status: " + response2.status);
             console.log("state" + body.state);
             console.log("location" + response2.location);
             if (body.error) {
+              // check for error field with code and message subfields in body
+
               console.log("error code: "+body.error.code);
               console.log("error message: "+body.error.message);
             }
           }
           console.log('error occurred: ' + err2);
-          // res.status(400).json({
-          //   success: false,
-          //   errors: {},
-          //   message: 'Error making request. Please try again later.'
-          // });
+          res.status(400).json({
+            success: false,
+            errors: {},
+            message: 'Error making request. Please try again later.'
+          });
         } else {
-          // console.log("sygic response:\n"+JSON.stringify(body));
-          // result returns a url?
           callback(null,response2.headers.location);
-          // res.status(200).json({
-          //   success: true,
-          //   response: body
-          // });
         }
       });
     }, function(err, urlResultsArr) {
@@ -603,18 +583,16 @@ router.post('/itinerary', function(req, res) {
                 console.log("response2.statusCode" + response2.statusCode);
                 console.log("body.state: " + body.state);
                 console.log('error occurred: ' + err2);
+                
                 clearInterval(intervalId);
 
-                // repeat in certain cases?, else, clearInterval and send error to user
-                // res.status(400).json({
-                //   success: false,
-                //   errors: {},
-                //   message: 'Error making request. Please try again later.'
-                // });
+                res.status(400).json({
+                  success: false,
+                  errors: {},
+                  message: 'Error making request. Please try again later.'
+                });
               } else if (body.status == 'OK') {
                 clearInterval(intervalId);
-
-                console.log("sygic response:\n"+JSON.stringify(body));
                 callback(null,body);
               }
             });
@@ -638,27 +616,11 @@ router.post('/itinerary', function(req, res) {
               }
               var activity = activities[j];
               var name = locationNames[activity.location_id];
-              var startDate = moment(activity.timestamp);
-              var year = startDate.year();
-              var month = startDate.month();
-              var date = startDate.date();
-              var hour = startDate.hour();
-              var minute = startDate.minutes();
-              var seconds = startDate.seconds();
-              var starttime = new Date(year,month,date,hour,minute,seconds);
-
-
+              var startTime = moment(activity.timestamp);
               var duration = moment.duration(activity.service_duration);
-              var endDate = moment(activity.timestamp).add(duration);
-              var year = endDate.year();
-              var month = endDate.month();
-              var date = endDate.date();
-              var hour = endDate.hour();
-              var minute = endDate.minutes();
-              var seconds = endDate.seconds();
-              var endtime = new Date(year,month,date,hour,minute,seconds);
+              var endTime = moment(activity.timestamp).add(duration);
 
-              eventsArr.push(makeEventObject(name,starttime, endtime));
+              eventsArr.push(makeEventObject(name, startTime.toDate(), endTime.toDate()));
             }
           }
           res.status(200).json({
