@@ -9,6 +9,8 @@ import { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 import SuggestionsMap from '../components/SuggestionsMap.jsx';
 import StartPointDialogBtn from '../components/StartPointDialog.jsx';
 import moment from 'moment';
+import geoTz from 'geo-tz';
+
 import async from 'async';
 
 
@@ -39,19 +41,24 @@ class SuggestionsPage extends React.Component {
   }
 
   setParentPlacesState(address) {
-    console.log("address:"+address)
     this.setState({ accommodation:address })
-    console.log("accommodation:"+this.state.accommodation)
   }
-  setParentStartTimeState(time) {
-    this.setState({ dailyStartTime: time });
-    console.log("daily start time:"+this.state.dailyStartTime);
-    
-  }
-  setParentEndTimeState(time) {
-    this.setState({ dailyEndTime: time });
-    console.log("daily end time:"+this.state.dailyEndTime);
 
+  setParentStartTimeState(time) {
+    this.setState({ dailyStartTime: this.convertToUTC(time) });
+    console.log("daily start time:"+this.state.dailyStartTime);
+  }
+
+  setParentEndTimeState(time) {
+    this.setState({ dailyEndTime: this.convertToUTC(time) });
+    console.log("daily end time:"+this.state.dailyEndTime);
+  }
+
+  // same time, different zone (to UTC)
+  convertToUTC(time) {
+    var utcZone = 'Europe/London';
+    var sameTimeDifferentZone = moment.tz(moment(time).format('YYYY-MM-DDTHH:mm:ss.SSS'), moment.ISO_8601, utcZone)
+    return sameTimeDifferentZone.toISOString().replace(/\.\d+Z/,'Z');
   }
 
   getIconUrl(icon) {
