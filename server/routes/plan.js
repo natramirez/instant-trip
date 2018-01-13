@@ -407,7 +407,7 @@ function matchLocationPlaceNames(selected, locationsArr) {
     if (i == 0 || i == locationsArr.length-1) {
       continue;
     } else {
-        console.log('\nselected[i] at matchLocation:\n'+ JSON.stringify(selected[i]));
+        // console.log('\nselected[i] at matchLocation:\n'+ JSON.stringify(selected[i-1]));
 
       matchDict[locationsArr[i].location_id] = selected[i-1].response.data.place.name;
     }
@@ -509,7 +509,7 @@ router.post('/itinerary', function(req, res) {
       console.log("startTime: " + startTime);
 
       console.log("endTime: " + endTime);
-      console.log("selected hereee:\n"+JSON.stringify(selected));
+      // console.log("selected hereee:\n"+JSON.stringify(selected));
 
       var locationsArray = getLocationsArray(startPoint, selected, endPoint, curDate);
       locationNames = matchLocationPlaceNames(selected, locationsArray);
@@ -591,35 +591,42 @@ router.post('/itinerary', function(req, res) {
         async.map(urlResultsArr, function(url, callback) {
           // var details = this.getPlaceDetails(place.id);
           // selected.push(details.data.place);
-          setTimeout(function() {
+          var intervalId = setInterval(function() {
             var reply = request.get({
               url: url
             },
             (err2, response2, body2) => {
               // var body = JSON.parse(body2);
               var body = JSON.parse(body2);
-              if (err2 || response2.statusCode != 200) {
+              if (err2 || response2.statusCode != 200 || body.state == 'Failed') {
                 console.log("full response: " + response2);
                 console.log("response2.statusCode" + response2.statusCode);
+                console.log("body.state: " + body.state);
                 console.log('error occurred: ' + err2);
+                clearInterval(intervalId);
+
+                // repeat in certain cases?, else, clearInterval and send error to user
                 // res.status(400).json({
                 //   success: false,
                 //   errors: {},
                 //   message: 'Error making request. Please try again later.'
                 // });
-              } else {
-                
-                console.log("sygic response:\n"+body);
+              } else if (body.status == 'OK') {
+                clearInterval(intervalId);
+
+                console.log("sygic response:\n"+JSON.stringify(body));
                 callback(null,body);
               }
             });
-          }, 2000);
+          }, 1000);
           
         }, function(err, results) {
           if (err) {
             console.log('error making trip results array');
           }
           console.log("completed full results:\n "+JSON.stringify(results));
+          
+          // make results into events format and return
           var eventsArr = [];
 
           for (var i = 0; i < results.length; i++) {
@@ -632,7 +639,7 @@ router.post('/itinerary', function(req, res) {
               var activity = activities[j];
               var name = locationNames[activity.location_id];
               var startDate = moment(activity.timestamp);
-              var year =startDate.year();
+              var year = startDate.year();
               var month = startDate.month();
               var date = startDate.date();
               var hour = startDate.hour();
@@ -643,20 +650,18 @@ router.post('/itinerary', function(req, res) {
 
               var duration = moment.duration(activity.service_duration);
               var endDate = moment(activity.timestamp).add(duration);
-              var year =endDate.year();
+              var year = endDate.year();
               var month = endDate.month();
               var date = endDate.date();
               var hour = endDate.hour();
               var minute = endDate.minutes();
               var seconds = endDate.seconds();
               var endtime = new Date(year,month,date,hour,minute,seconds);
+
               eventsArr.push(makeEventObject(name,starttime, endtime));
             }
-          
           }
-          // make results into events format and return
-
-        res.status(200).json({
+          res.status(200).json({
             success: true,
             response: eventsArr
           });

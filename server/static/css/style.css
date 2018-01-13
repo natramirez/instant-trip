@@ -103,11 +103,16 @@ a:hover {
   overflow-x: scroll;
 }
 .selected-box {
-  width: 200px;
+  width: 210px;
 }
 .selected-box > div > div > img {
   height: 70px !important;
   width: 70px !important;
+}
+.selected-box > div > div > div {
+  width: 30px;
+  float: left;
+
 }
 /* .selected-box > div > div > div{
   padding-left: 15px;
@@ -141,7 +146,7 @@ div.suggestion-box img.suggestions-img {
 
 .delete-selected-btn {
   position: absolute;
-  right: 0;
+  right: 6px;
   top: 16px;
   z-index: 1;
 }
@@ -159,7 +164,7 @@ div.suggestion-box img.suggestions-img {
 
 .suggestions-map {
   width: 100%;
-  height: 500px;
+  height: 420px;
 }
 
 .calendar-container {

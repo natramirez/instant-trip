@@ -151,11 +151,13 @@ class SuggestionsPage extends React.Component {
       /> : <CardHeader title={place.name} subtitle={place.categories[0]}/>;
     
     var media = place.thumbnail_url ? (
-      <CardMedia overlay={
+      <CardMedia>
+       {/* <CardMedia overlay={
         <CardTitle 
         title={place.name}
         subtitle={place.categories}
-        />}>
+        />} */}
+        {/* > */}
         <img className="suggestions-img" src={place.thumbnail_url} alt="" />
       </CardMedia>) : "";
 
