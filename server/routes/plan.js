@@ -483,11 +483,11 @@ router.post('/itinerary', function(req, res) {
     async.map(daysArray, function(curDay, callback) {
       var curDate = curDay.date;
 
-      var startTime = moment(curDate).set({
+      var startTime = moment(curDate).utc().set({
         'hour' : moment(body.dailyStartTime).utc().hour(),
         'minute' : moment(body.dailyStartTime).utc().minute()
       });
-      var endTime = moment(curDate).set({
+      var endTime = moment(curDate).utc().set({
         'hour' : moment(body.dailyEndTime).utc().hour(),
         'minute' : moment(body.dailyEndTime).utc().minute()
       });
@@ -614,9 +614,19 @@ router.post('/itinerary', function(req, res) {
               var name = locationNames[activity.location_id];
               var startTime = moment(activity.timestamp).utc();
               var duration = moment.duration(activity.service_duration);
-              var endTime = moment(activity.timestamp).utc().add(duration);
+              var endTime = moment(activity.timestamp).add(duration).utc();
 
-              eventsArr.push(makeEventObject(name, startTime.toDate(), endTime.toDate()));
+              console.log("startTime down here:\n "+ startTime.format());
+              console.log("endTime down here:\n "+ endTime.format());
+
+              var startJsDate = convertJsDateToUTC(new Date(startTime.toDate()));
+              var endJsDate = convertJsDateToUTC(new Date(endTime.toDate().getTime()));
+
+              console.log("startJsDate: " + startJsDate.to);
+              console.log("endJsDate: " + endJsDate);
+
+
+              eventsArr.push(makeEventObject(name, startJsDate, endJsDate));
             }
           }
           res.status(200).json({
@@ -628,6 +638,10 @@ router.post('/itinerary', function(req, res) {
     });
   });
 
+  function convertJsDateToUTC(date) {
+    return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 
+    date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds());
+  }
   function makeEventObject(title, starttime, endtime) {
     return {title:title, start: starttime, end: endtime};
   }
