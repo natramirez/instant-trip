@@ -214,6 +214,11 @@ class SuggestionsPage extends React.Component {
 
   */
 
+  convertJsDateToUTC(date) {
+    return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 
+    date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds());
+  }
+
 
   makeItinerary() {
     // const DirectionsService = new google.maps.DirectionsService();
@@ -304,8 +309,14 @@ class SuggestionsPage extends React.Component {
               var newEvents = [];
               for (var i = 0; i < xhr.response.response.length; i++) {
                 var curEvent = xhr.response.response[i];
-                curEvent.start = new Date(curEvent.start);
-                curEvent.end = new Date(curEvent.end);
+                // console.log('curEvent: '+curEvent);
+                console.log('curEvent before: '+JSON.stringify(curEvent));
+
+                curEvent.start = that.convertJsDateToUTC(new Date(curEvent.start));
+                curEvent.end = that.convertJsDateToUTC(new Date(curEvent.end));
+                console.log('curEvent after: '+JSON.stringify(curEvent));
+
+
                 newEvents.push(curEvent);
               }
 

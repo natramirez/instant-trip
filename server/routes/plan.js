@@ -620,13 +620,13 @@ router.post('/itinerary', function(req, res) {
               console.log("endTime down here:\n "+ endTime.format());
 
               var startJsDate = convertJsDateToUTC(new Date(startTime.toDate()));
-              var endJsDate = convertJsDateToUTC(new Date(endTime.toDate().getTime()));
+              var endJsDate = convertJsDateToUTC(new Date(endTime.toDate()));
 
-              console.log("startJsDate: " + startJsDate.to);
+              console.log("startJsDate: " + startJsDate);
               console.log("endJsDate: " + endJsDate);
 
 
-              eventsArr.push(makeEventObject(name, startJsDate, endJsDate));
+              eventsArr.push(makeEventObject(name, startTime, endTime));
             }
           }
           res.status(200).json({
