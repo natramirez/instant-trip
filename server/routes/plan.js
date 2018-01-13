@@ -267,7 +267,7 @@ var isOpenTime = true; //next number will be open time
 }
 
 function getLocationsArray(start, selected, end, date) {
-  var dayOfWeek = moment(date).day() + 1; //Sun=1 - Sat=7
+  var dayOfWeek = moment(date).utc().day() + 1; //Sun=1 - Sat=7
   var waypts = [];
   waypts.push({
     location_id: 'start',
@@ -460,8 +460,8 @@ router.post('/itinerary', function(req, res) {
     var endDate = moment(body.endDate).utc().format();
     console.log('newEndDate: '+endDate);
 
-    // console.log('oldDayStartTime: '+body.dailyStartTime);
-    // console.log('oldDayEndTime: '+body.dailyEndTime);
+    console.log('oldDayStartTime: '+body.dailyStartTime);
+    console.log('oldDayEndTime: '+body.dailyEndTime);
 
 
     var startPoint = body.accommodation;
@@ -612,9 +612,9 @@ router.post('/itinerary', function(req, res) {
               }
               var activity = activities[j];
               var name = locationNames[activity.location_id];
-              var startTime = moment(activity.timestamp);
+              var startTime = moment(activity.timestamp).utc();
               var duration = moment.duration(activity.service_duration);
-              var endTime = moment(activity.timestamp).add(duration);
+              var endTime = moment(activity.timestamp).utc().add(duration);
 
               eventsArr.push(makeEventObject(name, startTime.toDate(), endTime.toDate()));
             }
