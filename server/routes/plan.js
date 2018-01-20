@@ -277,43 +277,43 @@ function getLocationsArray(start, selected, end, date) {
     var index = 0;
     selected.forEach(function(place) {
     // console.log("place opening hours: " + place.opening_hours);
-    if (place.response.data.place.opening_hours) {
-      console.log("place opening hours: " + place.response.data.place.opening_hours);
-      var openingHoursArr = parseOpeningHoursToArray(place.response.data.place.opening_hours);
-      console.log(JSON.stringify(openingHoursArr));
-      if (openingHoursArr != 0) {
-        var openHours = openingHoursArr[dayOfWeek].open.hours;
-        var openMins = openingHoursArr[dayOfWeek].open.minutes;
-        var closeHours = openingHoursArr[dayOfWeek].open.hours;
-        var closeMins = openingHoursArr[dayOfWeek].open.minutes;
+    // if (place.response.data.place.opening_hours) {
+    //   console.log("place opening hours: " + place.response.data.place.opening_hours);
+    //   var openingHoursArr = parseOpeningHoursToArray(place.response.data.place.opening_hours);
+    //   console.log(JSON.stringify(openingHoursArr));
+    //   if (openingHoursArr != 0) {
+    //     var openHours = openingHoursArr[dayOfWeek].open.hours;
+    //     var openMins = openingHoursArr[dayOfWeek].open.minutes;
+    //     var closeHours = openingHoursArr[dayOfWeek].open.hours;
+    //     var closeMins = openingHoursArr[dayOfWeek].open.minutes;
   
-        var openingHours = moment(date).hours(openHours);
-        openingHours = moment(date).minutes(openMins);
-        var closingHours = moment(date).hours(closeHours);
-        closingHours = moment(date).minutes(closeMins);
+    //     var openingHours = moment(date).hours(openHours);
+    //     openingHours = moment(date).minutes(openMins);
+    //     var closingHours = moment(date).hours(closeHours);
+    //     closingHours = moment(date).minutes(closeMins);
   
-        // get place opening hours if defined
-        // using date, set the availability start and end times to the corresponding
-        //(check day of week of date and match to parse return array) hours and minutes
-        //
-        // var start = convertAvailabilityTimeToDate(place.opening_hours)
-        waypts.push({
-          location_id: 'stop'+index.toString(),
-          coordinates: place.response.data.place.location.lat+","+place.response.data.place.location.lng, //error handling?
-          availability: {earliest_start: openingHours, latest_end: closingHours} //Transform as needed, format: 2017-03-02T08:00:00Z; earliest_start, latest_end //what if no hours of op?
-        });
-      } else {
-        waypts.push({
-          location_id: 'stop'+index.toString(),
-          coordinates: place.response.data.place.location.lat+","+place.response.data.place.location.lng, //error handling?
-        });
-      }
-    } else {
+    //     // get place opening hours if defined
+    //     // using date, set the availability start and end times to the corresponding
+    //     //(check day of week of date and match to parse return array) hours and minutes
+    //     //
+    //     // var start = convertAvailabilityTimeToDate(place.opening_hours)
+    //     waypts.push({
+    //       location_id: 'stop'+index.toString(),
+    //       coordinates: place.response.data.place.location.lat+","+place.response.data.place.location.lng, //error handling?
+    //       availability: {earliest_start: openingHours, latest_end: closingHours} //Transform as needed, format: 2017-03-02T08:00:00Z; earliest_start, latest_end //what if no hours of op?
+    //     });
+    //   } else {
+    //     waypts.push({
+    //       location_id: 'stop'+index.toString(),
+    //       coordinates: place.response.data.place.location.lat+","+place.response.data.place.location.lng, //error handling?
+    //     });
+    //   }
+    // } else {
       waypts.push({
         location_id: 'stop'+index.toString(),
         coordinates: place.response.data.place.location.lat+","+place.response.data.place.location.lng, //error handling?
       });
-    }
+    // }
     // var locationId = 'stop'+index.toString();
     index++;
     });
@@ -527,8 +527,8 @@ router.post('/itinerary', function(req, res) {
         // var body = JSON.parse(body2);
         var body = body2;
         if (err2 || response2.statusCode != 202) {
-          console.log("full response: " + JSON.stringify(response2));
-          console.log("response2.statusCode" + response2.statusCode);
+          console.log("full response: " + response2);
+          console.log("response2.statusCode: " + response2.statusCode);
           if (body.status != 'OK') {
             console.log("not OK");
             console.log("full header: " + JSON.stringify(response2.headers));
@@ -575,8 +575,8 @@ router.post('/itinerary', function(req, res) {
               // var body = JSON.parse(body2);
               var body = JSON.parse(body2);
               if (err2 || response2.statusCode != 200 || body.state == 'Failed') {
-                console.log("full response: " + JSON.stringify(response2));
-                console.log("response2.statusCode" + response2.statusCode);
+                console.log("full response: " + response2);
+                console.log("response2.statusCode: " + response2.statusCode);
                 console.log("body.state: " + body.state);
                 console.log('error occurred: ' + err2);
                 
