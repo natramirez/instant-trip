@@ -256,6 +256,7 @@ class SuggestionsPage extends React.Component {
       xhr.addEventListener('load', () => {
         if (xhr.status === 200) {
           // success
+          console.log("xhr response in SuggestionsPage makeItinerary() func")
           console.log(xhr.response);
           callback(null, xhr.response);
         } else {
@@ -303,13 +304,9 @@ class SuggestionsPage extends React.Component {
               console.log('sucessssss');
               console.log(xhr.response);
 
-              // change the current URL to /
-              // console.log("router: " + this.context.router);
-              // console.log("context: " + JSON.stringify(this.context));
               var newEvents = [];
               for (var i = 0; i < xhr.response.response.length; i++) {
                 var curEvent = xhr.response.response[i];
-                // console.log('curEvent: '+curEvent);
                 console.log('curEvent before: '+JSON.stringify(curEvent));
 
                 curEvent.start = that.convertJsDateToUTC(new Date(curEvent.start));

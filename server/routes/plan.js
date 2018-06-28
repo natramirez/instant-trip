@@ -17,9 +17,12 @@ var SYGIC_URL = 'https://api.sygictravelapi.com/1.0/en/places/';
 var SYGIC_OPT_URL = 'https://optimization.api.sygic.com/v0/api/optimization?key='
 var SYGIC_MAPS_KEY = '2GfhK6NKpYTWWs49EgF5wpnMS';
 var SYGIC_KEY = 'EC6mGz7Pmv4Ora08FjLze3utwMvd95QpabXIijYH';
+var MAPBOX_URL = 'https://api.mapbox.com/optimized-trips/v1/mapbox/driving/';
+var MAPBOX_ROUNDTRIP_PARAMS = '?source=first&destination=last&roundtrip=true';
+var MAPBOX_KEY = '&access_token=pk.eyJ1IjoibmF0cmFtaXJleiIsImEiOiJjamlybHg2dWMwa2I4M2twaWlvcnlhYWw4In0.8De8ngC-F5BVcCDjvTcDig';
 
-var MAX_WAIT_TIME = '00:05:00'; //max wait time user waitsupon arrival before place opens:  5 minutes
-var AVG_DURATION_TIME = '01:00:00'; //avg time spent at each place
+// var MAX_WAIT_TIME = '00:05:00'; //max wait time user waitsupon arrival before place opens:  5 minutes
+var AVG_DURATION_TIME = '3600'; //avg time spent at each place (seconds)
 
 function validateTripForm(payload) {
   const errors = {};
@@ -266,63 +269,18 @@ var isOpenTime = true; //next number will be open time
   return openingHours;
 }
 
-function getLocationsArray(start, selected, end, date) {
-  var dayOfWeek = moment(date).utc().day() + 1; //Sun=1 - Sat=7
-  var waypts = [];
-  waypts.push({
-    location_id: 'start',
-    coordinates: start.lat+","+start.lng
-  });
+function getCoordinates(start, selected, end) {
+  // var dayOfWeek = moment(date).utc().day() + 1; //Sun=1 - Sat=7
+  var waypts = "";
+  waypts = waypts.concat(start.lng.toFixed(6)+","+start.lat.toFixed(6)+";");
   if (selected && selected.length > 0) {
-    var index = 0;
     selected.forEach(function(place) {
-    // console.log("place opening hours: " + place.opening_hours);
-    // if (place.response.data.place.opening_hours) {
-    //   console.log("place opening hours: " + place.response.data.place.opening_hours);
-    //   var openingHoursArr = parseOpeningHoursToArray(place.response.data.place.opening_hours);
-    //   console.log(JSON.stringify(openingHoursArr));
-    //   if (openingHoursArr != 0) {
-    //     var openHours = openingHoursArr[dayOfWeek].open.hours;
-    //     var openMins = openingHoursArr[dayOfWeek].open.minutes;
-    //     var closeHours = openingHoursArr[dayOfWeek].open.hours;
-    //     var closeMins = openingHoursArr[dayOfWeek].open.minutes;
-  
-    //     var openingHours = moment(date).hours(openHours);
-    //     openingHours = moment(date).minutes(openMins);
-    //     var closingHours = moment(date).hours(closeHours);
-    //     closingHours = moment(date).minutes(closeMins);
-  
-    //     // get place opening hours if defined
-    //     // using date, set the availability start and end times to the corresponding
-    //     //(check day of week of date and match to parse return array) hours and minutes
-    //     //
-    //     // var start = convertAvailabilityTimeToDate(place.opening_hours)
-    //     waypts.push({
-    //       location_id: 'stop'+index.toString(),
-    //       coordinates: place.response.data.place.location.lat+","+place.response.data.place.location.lng, //error handling?
-    //       availability: {earliest_start: openingHours, latest_end: closingHours} //Transform as needed, format: 2017-03-02T08:00:00Z; earliest_start, latest_end //what if no hours of op?
-    //     });
-    //   } else {
-    //     waypts.push({
-    //       location_id: 'stop'+index.toString(),
-    //       coordinates: place.response.data.place.location.lat+","+place.response.data.place.location.lng, //error handling?
-    //     });
-    //   }
-    // } else {
-      waypts.push({
-        location_id: 'stop'+index.toString(),
-        coordinates: place.response.data.place.location.lat+","+place.response.data.place.location.lng, //error handling?
-      });
-    // }
-    // var locationId = 'stop'+index.toString();
-    index++;
+    waypts = waypts.concat(place.response.data.place.location.lng.toFixed(6)+","+place.response.data.place.location.lat.toFixed(6)+";");
     });
   }
-  waypts.push({
-    location_id: 'end',
-    coordinates: end.lat+","+end.lng
-  });
-  console.log('waypts'+JSON.stringify(waypts));
+  waypts = waypts.substring(0,waypts.length-1);
+  // waypts = waypts.concat(end.lng+","+end.lat);
+  console.log('waypts: '+JSON.stringify(waypts));
   return waypts;
 }
 
@@ -370,11 +328,12 @@ function getTasksArray(selected) {
       index++;
     });
   }
-  console.log('tasks'+JSON.stringify(tasks));
+  console.log('tasks: '+JSON.stringify(tasks));
 
   return tasks;
 }
 
+// Get the details of a specific place.
 router.get('/place-details', function(req, res) {
   var id = req.query.id;
   var reply = request.get({
@@ -398,16 +357,26 @@ router.get('/place-details', function(req, res) {
     }
   });
 });
-function matchLocationPlaceNames(selected, locationsArr) {
+
+function makeLocationDict(selected, coordinates) {
   // console.log('\nselected at matchLocation:\n'+ JSON.stringify(selected));
   var matchDict = {};
+  var locationsArr = coordinates.split(';');
+  console.log('locationsArr length: ' + locationsArr.length);
   for (var i = 0; i < locationsArr.length; i++) {
-    if (i == 0 || i == locationsArr.length-1) {
+    if (i == 0) {
+    // if (i == 0 || i == locationsArr.length-1) {
       continue;
     } else {
         // console.log('\nselected[i] at matchLocation:\n'+ JSON.stringify(selected[i-1]));
-
-      matchDict[locationsArr[i].location_id] = selected[i-1].response.data.place.name;
+      var duration = selected[i-1].response.data.place.duration;
+      if (!duration) {
+        duration = AVG_DURATION_TIME;
+      }
+      matchDict[locationsArr[i]] = {
+        name: selected[i-1].response.data.place.name, 
+        duration: duration
+      };
     }
   }
   return matchDict;
@@ -434,6 +403,23 @@ function matchLocationPlaceNames(selected, locationsArr) {
 //     }
 //   });
 // }
+function matchCoordinate(coord, coordsDict) {
+  var closest = {key: null, diff: null};
+  var c, key, diff;
+  for (key in coordsDict) {
+    c = key.split(",");
+    c = c[0];
+    c = parseFloat(c);
+    diff = Math.abs(parseFloat(coord) - c);
+    if (!closest.key || diff < closest.diff) {
+        closest.key = key;
+        closest.diff = diff;
+    }
+    // update this func to also compare 2nd coord?
+  }
+  console.log("closest: " + JSON.stringify(closest));
+  return closest.key;
+}
 
 router.post('/itinerary', function(req, res) {
   console.log(req.body);
@@ -480,6 +466,7 @@ router.post('/itinerary', function(req, res) {
 
     var locationNames;
 
+    // map each date with an optimized route of POIs for itinerary
     async.map(daysArray, function(curDay, callback) {
       var curDate = curDay.date;
 
@@ -495,39 +482,20 @@ router.post('/itinerary', function(req, res) {
       console.log("startTime: " + startTime.format());
       console.log("endTime: " + endTime.format());
 
-      var locationsArray = getLocationsArray(startPoint, selected, endPoint, curDate);
-      locationNames = matchLocationPlaceNames(selected, locationsArray);
-
-      var formData = {
-        settings:{
-          max_wait_time: MAX_WAIT_TIME
-        },
-        locations: locationsArray,
-        vehicles: [
-          {
-              "vehicle_id": "vehicle",
-              "cost_per_km": 1,
-              "cost_per_hour": 1,
-              "fixed_cost": 5,
-              "start_location_id": "start",
-              "end_location_id": "end",
-              "availability": {
-                  "earliest_start": startTime,
-                  "latest_end": endTime
-              }
-          }
-        ],
-        tasks: getTasksArray(selected)
-      };
-      var reply = request.post({
-        url: `${SYGIC_OPT_URL}${SYGIC_MAPS_KEY}`,
-        json: formData
-      },
+      var coordinatesList = getCoordinates(startPoint, selected, endPoint);
+      locationNames = makeLocationDict(selected, coordinatesList);
+      console.log(locationNames);
+      // create Optimization request
+      var reply = request.get(`${MAPBOX_URL}${coordinatesList}${MAPBOX_ROUNDTRIP_PARAMS}${MAPBOX_KEY}`,
       (err2, response2, body2) => {
-        // var body = JSON.parse(body2);
-        var body = body2;
-        if (err2 || response2.statusCode != 202) {
-          console.log("full response: " + response2);
+        var body = JSON.parse(body2);
+
+        // var body = body2;
+        if (err2 || response2.statusCode != 200 || body.code != "Ok") {
+          console.log("full response: " + JSON.stringify(response2));
+          console.log("body2: "+ body2);
+          console.log("body2.code: "+ body2.code);
+
           console.log("response2.statusCode: " + response2.statusCode);
           if (body.status != 'OK') {
             console.log("not OK");
@@ -544,16 +512,33 @@ router.post('/itinerary', function(req, res) {
             }
           }
           console.log('error occurred: ' + err2);
-          res.status(400).json({
-            success: false,
-            errors: {},
-            message: 'Error making request. Please try again later.'
-          });
+          // should call callback with err set to true and let callback handle error
+          callback(true, null);
+          // res.status(400).json({
+          //   success: false,
+          //   errors: {},
+          //   message: 'Error making request. Please try again later.'
+          // });
         } else {
-          callback(null,response2.headers.location);
+          // if successful, callback is called. Data is now 'results'
+          console.log()
+          console.log("successful!")
+          console.log()
+          console.log("body.trips[0].legs : " + JSON.stringify(body.trips[0].legs));
+          console.log("number of legs: " + body.trips[0].legs.length);
+          console.log()
+          body["startTime"] = startTime;
+          body["endTime"] = endTime;
+          console.log()
+          console.log("body.startTime: " + body.startTime)
+          console.log()
+          console.log("body.endTime: " + body.endTime)
+          console.log()
+          callback(null, body);
         }
       });
-    }, function(err, urlResultsArr) {
+
+    }, function(err, results) {
       if (err) {
         console.log('error making place details array');
         res.status(400).json({
@@ -562,78 +547,81 @@ router.post('/itinerary', function(req, res) {
             message: 'Error making request. Please try again later.'
           });
       } else {
-        console.log("completed url results: "+JSON.stringify(urlResultsArr));
+        // console.log("completed results: "+JSON.stringify(results));
 
-        async.map(urlResultsArr, function(url, callback) {
-          // var details = this.getPlaceDetails(place.id);
-          // selected.push(details.data.place);
-          var intervalId = setInterval(function() {
-            var reply = request.get({
-              url: url
-            },
-            (err2, response2, body2) => {
-              // var body = JSON.parse(body2);
-              var body = JSON.parse(body2);
-              if (err2 || response2.statusCode != 200 || body.state == 'Failed') {
-                console.log("full response: " + response2);
-                console.log("response2.statusCode: " + response2.statusCode);
-                console.log("body.state: " + body.state);
-                console.log('error occurred: ' + err2);
-                
-                clearInterval(intervalId);
-
-                res.status(400).json({
-                  success: false,
-                  errors: {},
-                  message: 'Error making request. Please try again later.'
-                });
-              } else if (body.status == 'OK') {
-                clearInterval(intervalId);
-                callback(null,body);
-              }
-            });
-          }, 1000);
-          
-        }, function(err, results) {
-          if (err) {
-            console.log('error making trip results array');
-          }
-          console.log("completed full results:\n "+JSON.stringify(results));
-          
-          // make results into events format and return
-          var eventsArr = [];
-
-          for (var i = 0; i < results.length; i++) {
-            var activities = results[i].plan[0].activities;
-            var prevDuration = 0;
-            for (var j = 0; j < activities.length; j++) {
-              if (j == 0 || j == activities.length-1) {
-                continue;
-              }
-              var activity = activities[j];
-              var name = locationNames[activity.location_id];
-              var startTime = moment(activity.timestamp).utc();
-              var duration = moment.duration(activity.service_duration);
-              var endTime = moment(activity.timestamp).add(duration).utc();
-
-              console.log("startTime down here:\n "+ startTime.format());
-              console.log("endTime down here:\n "+ endTime.format());
-
-              var startJsDate = convertJsDateToUTC(new Date(startTime.toDate()));
-              var endJsDate = convertJsDateToUTC(new Date(endTime.toDate()));
-
-              console.log("startJsDate: " + startJsDate);
-              console.log("endJsDate: " + endJsDate);
-
-
-              eventsArr.push(makeEventObject(name, startTime, endTime));
-            }
-          }
-          res.status(200).json({
-            success: true,
-            response: eventsArr
-          });
+        // make results into events format and return
+        var eventsArr = [];
+        var waypts = results[0].waypoints;
+        waypts.sort(function (a, b) {
+          return a.waypoint_index - b.waypoint_index;
         });
+        console.log("waypts: " + waypts);
+        // waypoints = [];
+        var curTime = results[0].startTime;
+        // console.log("results: " + JSON.stringify(results))
+        console.log()
+        console.log("results.startTime: " + results[0].startTime);
+        console.log()
+
+        // from accomodation to first POI:
+        var legDuration = results[0].trips[0].legs[0].duration;
+        curTime.add(legDuration, 's');
+        console.log("curTime after leg "+ 0+": " + curTime.format());
+
+        // fix time (currently all times are 1 hour before set time in UI)
+        for (var i = 1; i < waypts.length; i++) {
+          // indexing above omits first leg (hotel to first POI), and final leg (last POI to hotel)
+          var coords = JSON.stringify(waypts[i].location)
+          coords = coords.substring(1,coords.length-1);
+          console.log("coords before: " + coords);
+          coords = matchCoordinate(coords, locationNames);
+          console.log("coords after: " + coords);
+          console.log("location names: " + JSON.stringify(locationNames));
+          var name = locationNames[coords].name;
+          var placeDuration = locationNames[coords].duration;
+          var startTime = moment(curTime).utc();
+          curTime.add(placeDuration,'s');
+          console.log("curTime after waypt "+ i+" duration: " + curTime.format());
+          var endTime = moment(curTime).utc();
+          eventsArr.push(makeEventObject(name, startTime, endTime));
+
+          legDuration = results[0].trips[0].legs[i].duration;
+          curTime.add(legDuration, 's');
+          console.log("curTime after leg "+ i+": " + curTime.format());
+        }
+        console.log();
+        console.log("events obj: " + JSON.stringify(eventsArr));
+        console.log();
+        // for (var i = 0; i < results.length; i++) {
+        //   var activities = results[i].plan[0].activities;
+        //   var prevDuration = 0;
+        //   for (var j = 0; j < activities.length; j++) {
+        //     if (j == 0 || j == activities.length-1) {
+        //       continue;
+        //     }
+        //     var activity = activities[j];
+        //     // var name = locationNames[activity.location_id];
+        //     var startTime = moment(activity.timestamp).utc();
+        //     var duration = moment.duration(activity.service_duration);
+        //     var endTime = moment(activity.timestamp).add(duration).utc();
+
+            
+
+        //     var startJsDate = convertJsDateToUTC(new Date(startTime.toDate()));
+        //     var endJsDate = convertJsDateToUTC(new Date(endTime.toDate()));
+
+        //     console.log("startJsDate: " + startJsDate);
+        //     console.log("endJsDate: " + endJsDate);
+
+
+        //     eventsArr.push(makeEventObject(name, startTime, endTime));
+        //   }
+        // }
+        res.status(200).json({
+          success: true,
+          response: eventsArr
+        });
+      // });
       }  
     });
   });
