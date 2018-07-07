@@ -1,7 +1,7 @@
 {
-  "name": "authentication-in-react-apps",
+  "name": "instant-trip",
   "version": "1.0.0",
-  "description": "Authentication in React Applications, Part 2: JSON Web Token (JWT)",
+  "description": "InstantTrip web application (MERN.js stack)",
   "main": "index.js",
   "scripts": {
     "start": "nodemon --use-strict index.js",
@@ -9,9 +9,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/vladimirponomarev/authentication-in-react-apps.git"
+    "url": "https://github.com/natramirez/instant-trip.git"
   },
-  "author": "Vladimir Ponomarev",
+  "author": "Natalia Ramirez",
   "license": "MIT",
   "dependencies": {
     "babel-preset-stage-2": "^6.24.1",
@@ -51,7 +51,7 @@
     "babel-preset-react": "^6.24.1",
     "css-loader": "^0.28.7",
     "json-loader": "^0.5.7",
-    "less": "^2.7.3",
+    "less": "^3.5.3",
     "less-loader": "^4.0.5",
     "nodemon": "^1.17.5",
     "react-svg-loader": "^2.1.0",
