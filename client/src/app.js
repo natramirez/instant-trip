@@ -1,5 +1,4 @@
 import 'react-dates/initialize';
-// import getMuiTheme from 'material-ui';
 // import '../../server/static/css/react_dates_overrides.css';
 import React from 'react';
 import ReactDom from 'react-dom';

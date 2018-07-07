@@ -1,6 +1,4 @@
 const path = require('path');
-// const webpack = require('webpack');
-
 
 module.exports = {
   // the entry file for the bundle
@@ -27,15 +25,11 @@ module.exports = {
             }
           }
         ]
-        // use: ['style-loader', 'css-loader']
       },
       {
       test: [/\.jsx?$/,/\.js?$/],
-      // exclude: /node_modules/,
       include: [
         path.join(__dirname, '/client/src'),
-        // path.join(__dirname, '/node_modules/react-dates'),
-        // path.join(__dirname, '/node_modules/react-dates')
 
       ],
       loader: 'babel-loader',
@@ -69,17 +63,6 @@ module.exports = {
     net: 'empty',
     tls: 'empty'
   },
-  // resolve: {
-  //   // extensions: ['', '.webpack.js', '.web.js', '.js']
-  // },
-  // target: 'node',
-  // plugins: [
-  //   new webpack.DefinePlugin({
-  //       'process.env.NODE_ENV': JSON.stringify('development'),
-  //       'global': {}, // bizarre lodash(?) webpack workaround
-  //       'global.GENTLY': false // superagent client fix
-  //   })
-  // ],
   // start Webpack in a watch mode, so Webpack will rebuild the bundle on changes
   watch: true
 };

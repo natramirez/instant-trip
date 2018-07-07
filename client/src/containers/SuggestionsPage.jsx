@@ -9,8 +9,6 @@ import { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 import SuggestionsMap from '../components/SuggestionsMap.jsx';
 import StartPointDialogBtn from '../components/StartPointDialog.jsx';
 import moment from 'moment';
-// import geoTz from 'geo-tz';
-
 import async from 'async';
 
 
