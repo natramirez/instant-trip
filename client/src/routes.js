@@ -26,9 +26,10 @@ const routes = {
     },
     {
       path: '/suggestions',
-      getComponent: (location, callback) => {
-          callback(null, SuggestionsPage);
-      }
+      component: SuggestionsPage
+      // getComponent: (location, callback) => {
+      //     callback(null, SuggestionsPage);
+      // }
       // component: SuggestionsPage
       // getComponent: (location, callback) => {
         // if (Auth.isUserAuthenticated()) { //if plan in progress

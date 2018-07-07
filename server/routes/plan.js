@@ -1,6 +1,6 @@
 const express = require('express');
 const request = require('request');
-const geoTz = require('geo-tz');
+// const geoTz = require('geo-tz');
 const moment = require('moment');
 const async = require('async');
 
@@ -14,7 +14,7 @@ const router = new express.Router();
 // var FOURSQUARE_SEARCH_URL = 'https://api.foursquare.com/v2/venues/search';
 
 var SYGIC_URL = 'https://api.sygictravelapi.com/1.0/en/places/';
-var SYGIC_OPT_URL = 'https://optimization.api.sygic.com/v0/api/optimization?key='
+// var SYGIC_OPT_URL = 'https://optimization.api.sygic.com/v0/api/optimization?key='
 var SYGIC_MAPS_KEY = '2GfhK6NKpYTWWs49EgF5wpnMS';
 var SYGIC_KEY = 'EC6mGz7Pmv4Ora08FjLze3utwMvd95QpabXIijYH';
 var MAPBOX_URL = 'https://api.mapbox.com/optimized-trips/v1/mapbox/driving/';

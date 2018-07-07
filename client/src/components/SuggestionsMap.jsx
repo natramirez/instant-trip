@@ -59,7 +59,7 @@ const MyMapComponent = compose(
   </GoogleMap>
 );
 
-class SuggestionsMap extends React.PureComponent {
+class SuggestionsMap extends React.Component {
   state = {
     isMarkerShown: false,
   }

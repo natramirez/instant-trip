@@ -52,7 +52,7 @@
     "json-loader": "^0.5.7",
     "less": "^2.7.3",
     "less-loader": "^4.0.5",
-    "nodemon": "^1.12.1",
+    "nodemon": "^1.17.5",
     "react-svg-loader": "^2.1.0",
     "style-loader": "^0.19.0",
     "webpack": "^2.7.0"

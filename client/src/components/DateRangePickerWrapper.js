@@ -4,12 +4,9 @@ import momentPropTypes from 'react-moment-proptypes';
 import moment from 'moment';
 import omit from 'lodash/omit';
 
-import DateRangePicker from 'react-dates/src/components/DateRangePicker.jsx';
-
-import { DateRangePickerPhrases } from 'react-dates/src/defaultPhrases';
-import DateRangePickerShape from 'react-dates/src/shapes/DateRangePickerShape';
-import { START_DATE, END_DATE, HORIZONTAL_ORIENTATION, ANCHOR_LEFT } from 'react-dates/src/constants';
-import isInclusivelyAfterDay from 'react-dates/src/utils/isInclusivelyAfterDay';
+import {DateRangePicker, DateRangePickerPhrases, DateRangePickerShape,isInclusivelyAfterDay} from 'react-dates';
+import { START_DATE, END_DATE, HORIZONTAL_ORIENTATION, ANCHOR_LEFT } from 'react-dates/constants';
+// import  from 'react-dates/src/utils/isInclusivelyAfterDay';
 
 const propTypes = {
   // example props for the demo
@@ -17,7 +14,7 @@ const propTypes = {
   autoFocusEndDate: PropTypes.bool,
   initialStartDate: momentPropTypes.momentObj,
   initialEndDate: momentPropTypes.momentObj,
-  setParentDatesState: PropTypes.func,
+  // setParentDatesState: PropTypes.func,
   ...omit(DateRangePickerShape, [
     'startDate',
     'endDate',
@@ -105,7 +102,7 @@ class DateRangePickerWrapper extends React.Component {
 
   onDatesChange({ startDate, endDate }) {
     this.setState({ startDate, endDate });
-    this.props.setParentDatesState({startDate,endDate});
+    // this.props.setParentDatesState({startDate,endDate});
   }
 
   onFocusChange(focusedInput) {

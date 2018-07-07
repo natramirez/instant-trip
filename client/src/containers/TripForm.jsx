@@ -234,8 +234,8 @@ class TripForm extends React.Component {
     var secondHalf = items.slice(halfItems);
 
     var checkboxContainers = 
-    [<div>{firstHalf.map(this.createCheckbox)}</div>,
-    <div>{secondHalf.map(this.createCheckbox)}</div>];
+    [<div key="1">{firstHalf.map(this.createCheckbox)}</div>,
+    <div key="2">{secondHalf.map(this.createCheckbox)}</div>];
 
     return checkboxContainers;
   }
@@ -255,7 +255,7 @@ class TripForm extends React.Component {
       </div>
       <div>
         <p>What dates will you be traveling?</p>
-      <DateRangePickerWrapper setParentDatesState={this.setParentDatesState} />
+      <DateRangePickerWrapper /*setParentDatesState={this.setParentDatesState}*/ />
       </div>
       {/* <LoginForm
         onSubmit={this.processForm}

@@ -4,7 +4,7 @@ const path = require('path');
 
 module.exports = {
   // the entry file for the bundle
-  entry: path.join(__dirname, '/client/src/app.jsx'),
+  entry: path.join(__dirname, '/client/src/app.js'),
   // the bundle file we will get in the result
   output: {
     path: path.join(__dirname, '/client/dist/js'),
@@ -12,12 +12,31 @@ module.exports = {
   },
   module: {
     // apply loaders to files that meet given conditions
-    loaders: [{
-      test: /\.jsx?$/,
+    loaders: [
+      {
+        test: /\.css$/,
+        use: [
+          {
+            loader: 'style-loader',
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true,
+              localIdentName: '[local]'
+            }
+          }
+        ]
+        // use: ['style-loader', 'css-loader']
+      },
+      {
+      test: [/\.jsx?$/,/\.js?$/],
       // exclude: /node_modules/,
       include: [
         path.join(__dirname, '/client/src'),
-        path.join(__dirname, '/node_modules/react-dates')
+        // path.join(__dirname, '/node_modules/react-dates'),
+        // path.join(__dirname, '/node_modules/react-dates')
+
       ],
       loader: 'babel-loader',
       query: {
@@ -30,10 +49,6 @@ module.exports = {
       options: {
         limit: 8192
       }
-    },
-    {
-      test: /\.css$/,
-      use: [ 'style-loader','css-loader' ]
     },
     {
       test: /\.less$/,
