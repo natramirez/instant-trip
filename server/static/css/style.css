@@ -189,9 +189,16 @@ div.suggestion-box img.suggestions-img {
   color: green;
 }
 
-/* .container div form div #PlacesAutocomplete__root input {
-  width: 90%;
-} */
+.homepage-container div div form div #PlacesAutocomplete__root{
+  /* width: 95% !important; */
+  margin: auto 0;
+  width: auto;
+}
+
+.homepage-container div div form div #PlacesAutocomplete__root #PlacesAutocomplete__autocomplete-container {
+  z-index: 2;
+  /* width: inherit */
+}
 
 .container div form {
   padding-bottom: 16px;

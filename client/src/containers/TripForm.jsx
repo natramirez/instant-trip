@@ -255,7 +255,7 @@ class TripForm extends React.Component {
       </div>
       <div>
         <p>What dates will you be traveling?</p>
-      <DateRangePickerWrapper /*setParentDatesState={this.setParentDatesState}*/ />
+      <DateRangePickerWrapper setParentDatesState={this.setParentDatesState} />
       </div>
       {/* <LoginForm
         onSubmit={this.processForm}

@@ -1,5 +1,5 @@
 import 'react-dates/initialize';
-// import '../../server/static/css/react_dates_overrides.css';
+import '../../server/static/css/react_dates_overrides.css';
 import React from 'react';
 import ReactDom from 'react-dom';
 import injectTapEventPlugin from 'react-tap-event-plugin';
@@ -10,9 +10,6 @@ import routes from './routes.js';
 import 'react-dates/lib/css/_datepicker.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.less';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-
-
-
 
 // remove tap delay, essential for MaterialUI to work properly
 injectTapEventPlugin();
